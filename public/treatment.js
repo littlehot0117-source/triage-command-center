@@ -312,7 +312,25 @@ function openAssessmentModal(patientId) {
   document.getElementById('assessPhone').value = '';
   document.getElementById('assessNotes').value = '';
   
-  document.getElementById('assessGcs').value = '';
+  // GCS slider parsing initialization
+  let gcsStr = '';
+  if (p.treatmentInfo && p.treatmentInfo.vitals) {
+    gcsStr = p.treatmentInfo.vitals.gcs || '';
+  }
+  
+  let eVal = 4, vVal = 5, mVal = 6;
+  const matchE = gcsStr.match(/E(\d)/i);
+  const matchV = gcsStr.match(/V(\d)/i);
+  const matchM = gcsStr.match(/M(\d)/i);
+  if (matchE) eVal = parseInt(matchE[1]);
+  if (matchV) vVal = parseInt(matchV[1]);
+  if (matchM) mVal = parseInt(matchM[1]);
+  
+  document.getElementById('gcsE').value = eVal;
+  document.getElementById('gcsV').value = vVal;
+  document.getElementById('gcsM').value = mVal;
+  updateGcsScore();
+
   document.getElementById('assessBpSys').value = '';
   document.getElementById('assessBpDia').value = '';
   document.getElementById('assessHr').value = '';
@@ -335,7 +353,6 @@ function openAssessmentModal(patientId) {
     selectAssessAge(t.ageGroup || 'adult');
     
     if (t.vitals) {
-      document.getElementById('assessGcs').value = t.vitals.gcs || '';
       document.getElementById('assessBpSys').value = t.vitals.bpSystolic || '';
       document.getElementById('assessBpDia').value = t.vitals.bpDiastolic || '';
       document.getElementById('assessHr').value = t.vitals.hr || '';
@@ -574,6 +591,32 @@ function saveAssessment(event) {
   
   closeAssessmentModal();
   alert(`患者 ${patientId} 治療區臨床病歷儲存成功！`);
+}
+
+// Update GCS score display dynamically
+function updateGcsScore() {
+  const e = parseInt(document.getElementById('gcsE').value) || 4;
+  const v = parseInt(document.getElementById('gcsV').value) || 5;
+  const m = parseInt(document.getElementById('gcsM').value) || 6;
+  
+  const displayE = document.getElementById('gcsEDisplay');
+  const displayV = document.getElementById('gcsVDisplay');
+  const displayM = document.getElementById('gcsMDisplay');
+  
+  if (displayE) displayE.innerText = e;
+  if (displayV) displayV.innerText = v;
+  if (displayM) displayM.innerText = m;
+  
+  const total = e + v + m;
+  const totalDisplay = document.getElementById('gcsTotalDisplay');
+  if (totalDisplay) {
+    totalDisplay.innerText = `GCS ${total} (E${e} V${v} M${m})`;
+  }
+  
+  const assessGcsInput = document.getElementById('assessGcs');
+  if (assessGcsInput) {
+    assessGcsInput.value = `${total} (E${e}V${v}M${m})`;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
