@@ -265,7 +265,7 @@ function renderState() {
   // 4. Render Patient Table (Waiting)
   const waitingTbody = document.getElementById('waitingPatientTableBody');
   if (waitingPatients.length === 0) {
-    waitingTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td></tr>`;
+    waitingTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td></tr>`;
   } else {
     waitingTbody.innerHTML = waitingPatients.map(p => {
       const timeStr = new Date(p.timestamp).toLocaleTimeString('zh-TW', { hour12: false });
@@ -277,6 +277,7 @@ function renderState() {
           <td><span class="triage-badge ${p.triageLevel}">${getTriageZh(p.triageLevel)}</span></td>
           <td>${genderZh} | ${ageGroupZh} | ${p.description || '<span style="color:var(--text-muted)">無備註</span>'}</td>
           <td>${formatLocation(p.location)}</td>
+          <td>${getTreatmentRecordCell(p)}</td>
           <td>${timeStr}</td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openTransportModal('${p.id}')">
@@ -769,4 +770,104 @@ function formatLocation(loc) {
   }
   
   return `<span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="map-pin" style="width:14px;height:14px;color:var(--text-muted);"></i>${loc}</span>`;
+}
+
+// Treatment records dashboard controllers
+function getTreatmentRecordCell(p) {
+  if (p.treatmentInfo) {
+    return `
+      <button class="btn btn-secondary btn-sm" style="padding:4px 8px; font-size:11.5px; border-color:#10b981; color:#10b981; background:rgba(16,185,129,0.05);" onclick="openTreatmentRecordModal('${p.id}')">
+        <i data-lucide="file-text" style="width:13px;height:13px;vertical-align:middle;margin-right:2px;"></i> 病歷已填
+      </button>
+    `;
+  }
+  return `<span style="color:var(--text-muted); font-size:11.5px; display:inline-flex; align-items:center; gap:2px;"><i data-lucide="help-circle" style="width:12px;height:12px;"></i> 未評估</span>`;
+}
+
+function openTreatmentRecordModal(patientId) {
+  const p = state.patients.find(x => x.id === patientId);
+  if (!p || !p.treatmentInfo) {
+    alert('找不到該傷患的治療區病歷記錄！');
+    return;
+  }
+  
+  const t = p.treatmentInfo;
+  
+  // Fill general details
+  document.getElementById('recName').innerText = t.name || '未填寫';
+  document.getElementById('recNationalId').innerText = t.nationalId || '未填寫';
+  document.getElementById('recPhone').innerText = t.phone || '未填寫';
+  
+  const genderZh = t.gender === 'male' ? '生理男' : t.gender === 'female' ? '生理女' : '不詳';
+  const ageZh = t.ageGroup === 'child' ? '兒童' : '成人';
+  document.getElementById('recGenderAge').innerText = `${genderZh} / ${ageZh}`;
+  
+  // Location
+  const locDiv = document.getElementById('recLocation');
+  locDiv.innerHTML = formatLocation(p.location);
+  
+  // Original Triage
+  document.getElementById('recOriginalTriage').innerHTML = `<span class="triage-badge ${p.triageLevel}">${getTriageZh(p.triageLevel)}</span>`;
+  
+  // Vitals
+  const vitals = t.vitals || {};
+  document.getElementById('recVitalsGcs').innerText = vitals.gcs || '-';
+  document.getElementById('recVitalsSpo2').innerText = vitals.spo2 ? `${vitals.spo2}%` : '-';
+  document.getElementById('recVitalsBp').innerText = (vitals.bpSystolic && vitals.bpDiastolic) ? `${vitals.bpSystolic}/${vitals.bpDiastolic}` : '-';
+  document.getElementById('recVitalsHr').innerText = vitals.hr ? `${vitals.hr} bpm` : '-';
+  document.getElementById('recVitalsRr').innerText = vitals.rr ? `${vitals.rr} 次/分` : '-';
+  document.getElementById('recVitalsTemp').innerText = vitals.temp ? `${vitals.temp} °C` : '-';
+  
+  // Vital warnings
+  setVitalWarningStyle('vitalSpo2Box', vitals.spo2 && parseInt(vitals.spo2) < 94);
+  setVitalWarningStyle('vitalBpBox', vitals.bpSystolic && (parseInt(vitals.bpSystolic) < 90 || parseInt(vitals.bpSystolic) > 150));
+  setVitalWarningStyle('vitalHrBox', vitals.hr && (parseInt(vitals.hr) < 50 || parseInt(vitals.hr) > 120));
+  setVitalWarningStyle('vitalRrBox', vitals.rr && (parseInt(vitals.rr) < 10 || parseInt(vitals.rr) > 29));
+  setVitalWarningStyle('vitalTempBox', vitals.temp && (parseFloat(vitals.temp) < 35.0 || parseFloat(vitals.temp) > 38.5));
+  
+  // Injured Parts
+  const partsContainer = document.getElementById('recInjuredPartsContainer');
+  if (t.injuredParts && t.injuredParts.length > 0) {
+    partsContainer.innerHTML = t.injuredParts.map(part => `
+      <span style="background: rgba(16,185,129,0.1); border: 1px solid #10b981; color: #10b981; padding: 4px 10px; border-radius: 4px; font-size:12px; font-weight:600;">
+        ${part}
+      </span>
+    `).join('');
+  } else {
+    partsContainer.innerHTML = `<span style="color:var(--text-muted); font-size:13px;">無外傷資料</span>`;
+  }
+  
+  // Secondary Triage
+  const secTriage = t.updatedTriageLevel || p.triageLevel;
+  const secBadge = document.getElementById('recSecondaryTriageBadge');
+  secBadge.className = `triage-badge ${secTriage}`;
+  secBadge.innerText = getTriageZh(secTriage);
+  
+  // Last updated
+  const dateStr = t.lastUpdated ? new Date(t.lastUpdated).toLocaleString('zh-TW', { hour12: false }) : '-';
+  document.getElementById('recLastUpdated').innerText = dateStr;
+  
+  // Notes
+  document.getElementById('recNotes').innerText = t.notes || '無任何處置備註紀錄';
+  
+  document.getElementById('treatmentRecordModal').classList.add('show');
+  lucide.createIcons();
+}
+
+function setVitalWarningStyle(elementId, isAbnormal) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  if (isAbnormal) {
+    el.style.background = 'rgba(244, 63, 94, 0.12)';
+    el.style.borderColor = 'rgba(244, 63, 94, 0.3)';
+    el.style.color = 'var(--triage-red)';
+  } else {
+    el.style.background = 'rgba(255, 255, 255, 0.02)';
+    el.style.borderColor = 'rgba(255, 255, 255, 0.04)';
+    el.style.color = 'var(--text-main)';
+  }
+}
+
+function closeTreatmentRecordModal() {
+  document.getElementById('treatmentRecordModal').classList.remove('show');
 }

@@ -150,6 +150,7 @@
                   <th>檢傷等級</th>
                   <th>特徵/性別/年齡</th>
                   <th>地點</th>
+                  <th>臨床病歷</th>
                   <th>時間</th>
                   <th>調度送醫</th>
                 </tr>
@@ -157,7 +158,7 @@
               <tbody id="waitingPatientTableBody">
                 <!-- Dynamic Rows -->
                 <tr>
-                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td>
+                  <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td>
                 </tr>
               </tbody>
             </table>
@@ -374,6 +375,115 @@
       </div>
       <div class="modal-actions" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
         <button class="btn btn-secondary" onclick="closeHospitalPatientsModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Treatment Record Viewer Modal -->
+  <div id="treatmentRecordModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 580px; width: 95%; max-height: 85vh; overflow-y: auto;">
+      <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="file-text" style="color: #10b981; width:22px; height:22px; vertical-align: middle;"></i>
+          <span id="recordModalTitle" style="font-weight:700;">治療區臨床病歷詳細資料</span>
+        </div>
+        <button type="button" onclick="closeTreatmentRecordModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+          <i data-lucide="x" style="width:20px; height:20px;"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body" style="text-align: left; display:flex; flex-direction:column; gap:16px;">
+        <!-- General Info Section -->
+        <div>
+          <div style="font-size:13.5px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin-bottom:10px;">
+            一、 傷患基本資料
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:12px; border-radius:var(--radius-sm); font-size:13px;">
+            <div><b>姓名：</b><span id="recName">-</span></div>
+            <div><b>身分證字號：</b><span id="recNationalId">-</span></div>
+            <div><b>聯絡電話：</b><span id="recPhone">-</span></div>
+            <div><b>性別/年齡：</b><span id="recGenderAge">-</span></div>
+            <div><b>原處位置：</b><span id="recLocation">-</span></div>
+            <div><b>原檢傷等級：</b><span id="recOriginalTriage">-</span></div>
+          </div>
+        </div>
+
+        <!-- Vital Signs Section -->
+        <div>
+          <div style="font-size:13.5px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin-bottom:10px;">
+            二、 生命徵象 (Vital Signs)
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; font-size:12.5px;">
+            <div id="vitalGcsBox" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">意識狀態 (GCS)</div>
+              <strong id="recVitalsGcs" style="font-size:15px;">-</strong>
+            </div>
+            <div id="vitalSpo2Box" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">血氧 SpO2</div>
+              <strong id="recVitalsSpo2" style="font-size:15px;">-</strong>
+            </div>
+            <div id="vitalBpBox" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">血壓 BP</div>
+              <strong id="recVitalsBp" style="font-size:14px;">-</strong>
+            </div>
+            <div id="vitalHrBox" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">脈搏/心跳 HR</div>
+              <strong id="recVitalsHr" style="font-size:15px;">-</strong>
+            </div>
+            <div id="vitalRrBox" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">呼吸頻率 RR</div>
+              <strong id="recVitalsRr" style="font-size:15px;">-</strong>
+            </div>
+            <div id="vitalTempBox" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">體溫 Temp</div>
+              <strong id="recVitalsTemp" style="font-size:15px;">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Injured Parts Section -->
+        <div>
+          <div style="font-size:13.5px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin-bottom:10px;">
+            三、 受傷部位
+          </div>
+          <div id="recInjuredPartsContainer" style="display:flex; flex-wrap:wrap; gap:8px; padding:6px 0;">
+            <!-- Dynamic Badges -->
+          </div>
+        </div>
+
+        <!-- Secondary Triage Info -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:13px;">
+          <div>
+            <div style="font-size:13.5px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin-bottom:10px;">
+              四、 治療區二次檢傷
+            </div>
+            <div id="recSecondaryTriageBadge" style="display:inline-block; font-weight:700; padding:6px 14px; border-radius:50px;">
+              -
+            </div>
+          </div>
+          <div>
+            <div style="font-size:13.5px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin-bottom:10px;">
+              病歷最後更新時間
+            </div>
+            <div id="recLastUpdated" style="color:var(--text-muted); font-weight:500; padding-top:6px;">
+              -
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinical Notes Section -->
+        <div>
+          <div style="font-size:13.5px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin-bottom:10px;">
+            五、 臨床處置與備註說明
+          </div>
+          <div id="recNotes" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); padding:12px; border-radius:var(--radius-sm); font-size:13px; min-height:60px; white-space:pre-wrap; line-height:1.5; color:var(--text-main);">
+            -
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+        <button class="btn btn-secondary" onclick="closeTreatmentRecordModal()">關閉</button>
       </div>
     </div>
   </div>

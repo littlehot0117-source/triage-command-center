@@ -1010,3 +1010,30 @@ tr:hover td {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1) !important;
 }
 
+/* Treatment Area custom button checkboxes */
+.part-checkbox-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 12px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.part-checkbox-btn.active {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+  color: white !important;
+}
+
+.part-checkbox-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+
