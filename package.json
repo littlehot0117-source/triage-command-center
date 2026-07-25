@@ -1,0 +1,14 @@
+{
+  "name": "triage-command-center",
+  "version": "1.0.0",
+  "description": "Real-time Mass Casualty Incident (MCI) Triage and Command Center Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  },
+  "private": true
+}
