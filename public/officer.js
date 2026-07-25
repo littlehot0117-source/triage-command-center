@@ -1,8 +1,10 @@
 let officerCode = null;
-let currentTriageMethod = 'wizard'; // 'wizard' or 'direct'
+let currentTriageMethod = 'wizard'; // 'wizard', 'jumpstart', or 'direct'
 let computedColor = null;
 let wizardAnswers = {};
 let currentWizardStep = 1;
+let jumpstartAnswers = {};
+let currentJumpStartStep = 1;
 
 let socket = null;
 let hasWebSocket = false;
@@ -230,28 +232,31 @@ function switchAppTab(tabName) {
   lucide.createIcons();
 }
 
-// Switch Triage UI mode (Wizard vs Direct)
+// Switch Triage UI mode (START vs JumpSTART vs Direct)
 function switchTriageMethod(method) {
   currentTriageMethod = method;
   const tabWizard = document.getElementById('tabWizard');
+  const tabJumpStart = document.getElementById('tabJumpStart');
   const tabDirect = document.getElementById('tabDirect');
+  
   const wizardPanel = document.getElementById('wizardPanel');
+  const jumpstartPanel = document.getElementById('jumpstartPanel');
   const directPanel = document.getElementById('directPanel');
   
-  if (method === 'wizard') {
-    tabWizard.className = 'btn';
-    tabDirect.className = 'btn btn-secondary';
-    wizardPanel.style.display = 'block';
-    directPanel.style.display = 'none';
-  } else {
-    tabWizard.className = 'btn btn-secondary';
-    tabDirect.className = 'btn';
-    wizardPanel.style.display = 'none';
-    directPanel.style.display = 'block';
-  }
+  if (tabWizard) tabWizard.className = method === 'wizard' ? 'btn' : 'btn btn-secondary';
+  if (tabJumpStart) tabJumpStart.className = method === 'jumpstart' ? 'btn' : 'btn btn-secondary';
+  if (tabDirect) tabDirect.className = method === 'direct' ? 'btn' : 'btn btn-secondary';
+  
+  if (wizardPanel) wizardPanel.style.display = method === 'wizard' ? 'block' : 'none';
+  if (jumpstartPanel) jumpstartPanel.style.display = method === 'jumpstart' ? 'block' : 'none';
+  if (directPanel) directPanel.style.display = method === 'direct' ? 'block' : 'none';
   
   computedColor = null;
   updateComputedColorUI();
+  
+  // Reset step views on tab switch
+  setWizardStep(1);
+  setJumpStartStep(1);
 }
 
 // START Triage Wizard Steps
@@ -319,6 +324,93 @@ function wizardAnswer(step, answer) {
     } else {
       finishWizard('red');
     }
+  }
+}
+
+// JumpSTART Triage Wizard Steps
+function setJumpStartStep(stepId) {
+  currentJumpStartStep = stepId;
+  const steps = document.querySelectorAll('#jumpstartPanel .wizard-step');
+  steps.forEach(s => s.classList.remove('active'));
+  
+  const activeStep = document.getElementById('stepJ' + stepId);
+  if (activeStep) {
+    activeStep.classList.add('active');
+  }
+  
+  let progressText = '步驟';
+  if (stepId === 1) progressText = '步驟 1 / 5';
+  else if (stepId === 2) progressText = '步驟 2 / 5';
+  else if (stepId === '2_5') progressText = '步驟 2.5 / 5';
+  else if (stepId === '2_6') progressText = '步驟 2.6 / 5';
+  else if (stepId === 3) progressText = '步驟 3 / 5';
+  else if (stepId === 4) progressText = '步驟 4 / 5';
+  else if (stepId === 5) progressText = '步驟 5 / 5';
+  
+  const indicator = document.getElementById('jumpstartStepIndicator');
+  if (indicator) indicator.innerText = progressText;
+}
+
+function jumpstartAnswer(step, answer) {
+  jumpstartAnswers[step] = answer;
+  
+  if (step === 1) {
+    if (answer === true) {
+      finishWizard('green');
+      selectAge('child');
+    } else {
+      setJumpStartStep(2);
+    }
+  } 
+  else if (step === 2) {
+    if (answer === true) {
+      setJumpStartStep(3);
+    } else {
+      setJumpStartStep('2_5');
+    }
+  } 
+  else if (step === '2_5') {
+    if (answer === 'breathes') {
+      finishWizard('red');
+      selectAge('child');
+    } else if (answer === 'no_pulse') {
+      finishWizard('black');
+      selectAge('child');
+    } else if (answer === 'has_pulse') {
+      setJumpStartStep('2_6');
+    }
+  } 
+  else if (step === '2_6') {
+    if (answer === true) {
+      finishWizard('red');
+    } else {
+      finishWizard('black');
+    }
+    selectAge('child');
+  } 
+  else if (step === 3) {
+    if (answer === false) {
+      finishWizard('red');
+    } else {
+      setJumpStartStep(4);
+    }
+    selectAge('child');
+  } 
+  else if (step === 4) {
+    if (answer === false) {
+      finishWizard('red');
+    } else {
+      setJumpStartStep(5);
+    }
+    selectAge('child');
+  } 
+  else if (step === 5) {
+    if (answer === true) {
+      finishWizard('yellow');
+    } else {
+      finishWizard('red');
+    }
+    selectAge('child');
   }
 }
 
@@ -459,7 +551,9 @@ function getTriageLabel(color) {
 function resetForm() {
   computedColor = null;
   wizardAnswers = {};
+  jumpstartAnswers = {};
   setWizardStep(1);
+  setJumpStartStep(1);
   
   const btns = document.querySelectorAll('.triage-color-btn');
   btns.forEach(btn => {

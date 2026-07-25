@@ -65,13 +65,16 @@
       
       <!-- PAGE 1: Triage Form Tab (default active) -->
       <div id="pageTriage" class="tab-content-page">
-        <!-- Triage Selector (Wizard vs Direct) -->
-        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <button id="tabWizard" class="btn" style="flex: 1; font-size: 12px; padding: 8px 12px;" onclick="switchTriageMethod('wizard')">
-            <i data-lucide="help-circle" style="width:14px; height:14px;"></i> START 步驟引導
+        <!-- Triage Selector (START vs JumpSTART vs Direct) -->
+        <div style="display: flex; gap: 6px; margin-bottom: 16px;">
+          <button id="tabWizard" class="btn" style="flex: 1.1; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('wizard')">
+            <i data-lucide="help-circle" style="width:13px; height:13px;"></i> START引導
           </button>
-          <button id="tabDirect" class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 8px 12px;" onclick="switchTriageMethod('direct')">
-            <i data-lucide="palette" style="width:14px; height:14px;"></i> 直接分類顏色
+          <button id="tabJumpStart" class="btn btn-secondary" style="flex: 1.2; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('jumpstart')">
+            <i data-lucide="baby" style="width:13px; height:13px;"></i> JumpSTART
+          </button>
+          <button id="tabDirect" class="btn btn-secondary" style="flex: 0.8; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('direct')">
+            <i data-lucide="palette" style="width:13px; height:13px;"></i> 直接分類
           </button>
         </div>
 
@@ -133,6 +136,80 @@
             <div class="wizard-options">
               <button class="wizard-btn primary" onclick="wizardAnswer(5, true)">🟡 能遵守 (黃傷)</button>
               <button class="wizard-btn btn-danger" onclick="wizardAnswer(5, false)">🔴 無法遵守 (紅傷)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Triage Wizard: JumpSTART (Pediatric) -->
+        <div id="jumpstartPanel" class="wizard-box" style="display: none;">
+          <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between;">
+            <span>JumpSTART 兒童篩檢指引</span>
+            <span id="jumpstartStepIndicator">步驟 1 / 5</span>
+          </h3>
+
+          <!-- Step J1 -->
+          <div id="stepJ1" class="wizard-step active">
+            <div class="wizard-question">1. 傷患是否能夠自行行走？</div>
+            <div class="wizard-options">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer(1, true)">🟢 可以行走 ➡️ 輕傷</button>
+              <button class="wizard-btn" onclick="jumpstartAnswer(1, false)">無法行走</button>
+            </div>
+          </div>
+
+          <!-- Step J2 -->
+          <div id="stepJ2" class="wizard-step">
+            <div class="wizard-question">2. 傷患是否有自主呼吸？</div>
+            <div class="wizard-options">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer(2, true)">有呼吸</button>
+              <button class="wizard-btn btn-danger" onclick="jumpstartAnswer(2, false)">無呼吸</button>
+            </div>
+          </div>
+
+          <!-- Step J2_5 -->
+          <div id="stepJ2_5" class="wizard-step">
+            <div class="wizard-question">2.5. 打開呼吸道，呼吸與脈搏評估？</div>
+            <div class="wizard-options" style="grid-template-columns: 1fr; gap: 8px;">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer('2_5', 'breathes')" style="width: 100%;">🔴 恢復呼吸 ➡️ 立即治療</button>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <button class="wizard-btn btn-danger" style="background:#1e293b" onclick="jumpstartAnswer('2_5', 'no_pulse')">⚫ 無呼吸+無脈搏 ➡️ 死亡</button>
+                <button class="wizard-btn primary" onclick="jumpstartAnswer('2_5', 'has_pulse')">給予 5 次人工呼吸</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step J2_6 -->
+          <div id="stepJ2_6" class="wizard-step">
+            <div class="wizard-question">2.6. 給予 5 次人工呼吸後，是否恢復呼吸？</div>
+            <div class="wizard-options">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer('2_6', true)">🔴 恢復呼吸 ➡️ 立即治療</button>
+              <button class="wizard-btn btn-danger" style="background:#1e293b" onclick="jumpstartAnswer('2_6', false)">⚫ 仍無呼吸 ➡️ 死亡</button>
+            </div>
+          </div>
+
+          <!-- Step J3 -->
+          <div id="stepJ3" class="wizard-step">
+            <div class="wizard-question">3. 評估呼吸頻率是否介於 15 至 45 次/分之間？</div>
+            <div class="wizard-options">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer(3, true)">是 (RR 15 - 45 次/分)</button>
+              <button class="wizard-btn btn-danger" onclick="jumpstartAnswer(3, false)">🔴 否 (RR &lt; 15 或 &gt; 45)</button>
+            </div>
+          </div>
+
+          <!-- Step J4 -->
+          <div id="stepJ4" class="wizard-step">
+            <div class="wizard-question">4. 觸摸橈動脈搏動是否存在？</div>
+            <div class="wizard-options">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer(4, true)">是 (有橈動脈搏動)</button>
+              <button class="wizard-btn btn-danger" onclick="jumpstartAnswer(4, false)">🔴 否 (無搏動)</button>
+            </div>
+          </div>
+
+          <!-- Step J5 -->
+          <div id="stepJ5" class="wizard-step">
+            <div class="wizard-question">5. 意識評估 (AVPU)：傷患是否有適當反應？</div>
+            <div class="wizard-options">
+              <button class="wizard-btn primary" onclick="jumpstartAnswer(5, true)">🟡 有適當反應 (黃傷)</button>
+              <button class="wizard-btn btn-danger" onclick="jumpstartAnswer(5, false)">🔴 無適當反應 (紅傷)</button>
             </div>
           </div>
         </div>
