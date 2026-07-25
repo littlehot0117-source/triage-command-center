@@ -146,6 +146,7 @@
           <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
             三、 生命徵象 (Vital Signs)
           </div>
+
           <!-- GCS Sliders (Full Width) -->
           <div class="form-group" style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
             <div style="font-size:13px; color:var(--text-muted); font-weight:600; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -154,20 +155,29 @@
             </div>
             
             <div style="display:flex; flex-direction:column; gap:12px;">
-              <div style="display:flex; align-items:center; gap:16px;">
-                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:60px;">E (眼睜)</span>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:55px;">E (眼睜)</span>
                 <input type="range" id="gcsE" min="1" max="4" value="4" oninput="updateGcsScore()" style="flex:1; accent-color:#10b981; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none;">
                 <span id="gcsEDisplay" style="font-weight:800; font-size:13.5px; width:20px; text-align:right;">4</span>
+                <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-left:8px; user-select:none;">
+                  <input type="checkbox" id="gcsENT" onchange="updateGcsScore()" style="accent-color:#10b981; width:14px; height:14px; cursor:pointer;"> NT
+                </label>
               </div>
-              <div style="display:flex; align-items:center; gap:16px;">
-                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:60px;">V (言語)</span>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:55px;">V (言語)</span>
                 <input type="range" id="gcsV" min="1" max="5" value="5" oninput="updateGcsScore()" style="flex:1; accent-color:#10b981; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none;">
                 <span id="gcsVDisplay" style="font-weight:800; font-size:13.5px; width:20px; text-align:right;">5</span>
+                <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-left:8px; user-select:none;">
+                  <input type="checkbox" id="gcsVNT" onchange="updateGcsScore()" style="accent-color:#10b981; width:14px; height:14px; cursor:pointer;"> NT
+                </label>
               </div>
-              <div style="display:flex; align-items:center; gap:16px;">
-                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:60px;">M (運動)</span>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:55px;">M (運動)</span>
                 <input type="range" id="gcsM" min="1" max="6" value="6" oninput="updateGcsScore()" style="flex:1; accent-color:#10b981; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none;">
                 <span id="gcsMDisplay" style="font-weight:800; font-size:13.5px; width:20px; text-align:right;">6</span>
+                <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-left:8px; user-select:none;">
+                  <input type="checkbox" id="gcsMNT" onchange="updateGcsScore()" style="accent-color:#10b981; width:14px; height:14px; cursor:pointer;"> NT
+                </label>
               </div>
             </div>
             <input type="hidden" id="assessGcs" value="15 (E4V5M6)">
@@ -210,8 +220,12 @@
           </div>
 
           <!-- Section 4: Secondary Triage Override -->
-          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
-            四、 二次檢傷等級判定
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px; display:flex; justify-content:space-between; align-items:center;">
+            <span>四、 二次檢傷等級判定</span>
+            <span id="triageSuggestionBox" style="font-size:12px; font-weight:normal; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px;">
+              生理預判：<span id="suggestedTriageLabel" style="font-weight:700;">-</span> 
+              <button type="button" onclick="applySuggestedTriage()" id="applyTriageSuggestionBtn" style="display:none; background:rgba(59,130,246,0.1); border:1px solid var(--primary); color:var(--primary); padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer;">套用</button>
+            </span>
           </div>
           <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:16px;">
             <button type="button" class="triage-color-btn red assess-triage-btn" onclick="setAssessTriage('red')" style="padding:10px 4px; font-size:12px; height:auto; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:none;">
@@ -235,7 +249,12 @@
 
           <!-- Section 5: Clinical Notes -->
           <div class="form-group" style="margin-top: 16px;">
-            <label for="assessNotes">臨床備註/用藥處置</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label for="assessNotes" style="margin-bottom:0;">臨床備註/用藥處置</label>
+              <button type="button" onclick="insertNoteTimestamp()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-family:var(--font-body);">
+                <i data-lucide="clock" style="width:12px; height:12px;"></i> 插入時間戳記
+              </button>
+            </div>
             <textarea id="assessNotes" class="input-control" placeholder="請描述主要傷勢、已進行的緊急醫療處置 (如：給氧、包紮止血、靜脈注射) 或用藥紀錄..." style="height: 80px; resize: none; background: rgba(0, 0, 0, 0.3); color: white; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); width:100%; outline:none; font-family:var(--font-body);"></textarea>
           </div>
 

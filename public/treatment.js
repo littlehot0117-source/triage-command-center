@@ -319,16 +319,37 @@ function openAssessmentModal(patientId) {
   }
   
   let eVal = 4, vVal = 5, mVal = 6;
-  const matchE = gcsStr.match(/E(\d)/i);
-  const matchV = gcsStr.match(/V(\d)/i);
-  const matchM = gcsStr.match(/M(\d)/i);
-  if (matchE) eVal = parseInt(matchE[1]);
-  if (matchV) vVal = parseInt(matchV[1]);
-  if (matchM) mVal = parseInt(matchM[1]);
+  let ent = false, vnt = false, mnt = false;
+  
+  if (gcsStr.includes('ENT') || gcsStr.includes('E-NT') || gcsStr.match(/E\s*NT/i)) {
+    ent = true;
+  } else {
+    const matchE = gcsStr.match(/E(\d)/i);
+    if (matchE) eVal = parseInt(matchE[1]);
+  }
+  
+  if (gcsStr.includes('VNT') || gcsStr.includes('V-NT') || gcsStr.match(/V\s*NT/i)) {
+    vnt = true;
+  } else {
+    const matchV = gcsStr.match(/V(\d)/i);
+    if (matchV) vVal = parseInt(matchV[1]);
+  }
+  
+  if (gcsStr.includes('MNT') || gcsStr.includes('M-NT') || gcsStr.match(/M\s*NT/i)) {
+    mnt = true;
+  } else {
+    const matchM = gcsStr.match(/M(\d)/i);
+    if (matchM) mVal = parseInt(matchM[1]);
+  }
+  
+  document.getElementById('gcsENT').checked = ent;
+  document.getElementById('gcsVNT').checked = vnt;
+  document.getElementById('gcsMNT').checked = mnt;
   
   document.getElementById('gcsE').value = eVal;
   document.getElementById('gcsV').value = vVal;
   document.getElementById('gcsM').value = mVal;
+  
   updateGcsScore();
 
   document.getElementById('assessBpSys').value = '';
@@ -495,6 +516,7 @@ function validateVital(vitalType) {
       input.style.color = 'var(--text-main)';
     }
   }
+  updateTriageSuggestion();
 }
 
 function validateAllVitals() {
@@ -551,7 +573,15 @@ function saveAssessment(event) {
   const spo2 = document.getElementById('assessSpo2').value.trim();
   const temp = document.getElementById('assessTemp').value.trim();
   
-  const notes = document.getElementById('assessNotes').value.trim();
+  let notes = document.getElementById('assessNotes').value.trim();
+  if (notes) {
+    const timestampRegex = /^\[\d{2}:\d{2}(:\d{2})?\]/;
+    if (!timestampRegex.test(notes)) {
+      const now = new Date();
+      const timePrefix = `[${now.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' })}] `;
+      notes = timePrefix + notes;
+    }
+  }
   const triageLevel = selectedTriageLevel;
   
   const treatmentInfo = {
@@ -593,30 +623,173 @@ function saveAssessment(event) {
   alert(`患者 ${patientId} 治療區臨床病歷儲存成功！`);
 }
 
-// Update GCS score display dynamically
+// Update GCS score display dynamically, handling NT (Not Testable) checkboxes
 function updateGcsScore() {
-  const e = parseInt(document.getElementById('gcsE').value) || 4;
-  const v = parseInt(document.getElementById('gcsV').value) || 5;
-  const m = parseInt(document.getElementById('gcsM').value) || 6;
+  const ent = document.getElementById('gcsENT').checked;
+  const vnt = document.getElementById('gcsVNT').checked;
+  const mnt = document.getElementById('gcsMNT').checked;
+  
+  const eSlider = document.getElementById('gcsE');
+  const vSlider = document.getElementById('gcsV');
+  const mSlider = document.getElementById('gcsM');
+  
+  if (eSlider) eSlider.disabled = ent;
+  if (vSlider) vSlider.disabled = vnt;
+  if (mSlider) mSlider.disabled = mnt;
+  
+  const eVal = ent ? 'NT' : (eSlider ? eSlider.value : 4);
+  const vVal = vnt ? 'NT' : (vSlider ? vSlider.value : 5);
+  const mVal = mnt ? 'NT' : (mSlider ? mSlider.value : 6);
   
   const displayE = document.getElementById('gcsEDisplay');
   const displayV = document.getElementById('gcsVDisplay');
   const displayM = document.getElementById('gcsMDisplay');
   
-  if (displayE) displayE.innerText = e;
-  if (displayV) displayV.innerText = v;
-  if (displayM) displayM.innerText = m;
+  if (displayE) displayE.innerText = eVal;
+  if (displayV) displayV.innerText = vVal;
+  if (displayM) displayM.innerText = mVal;
   
-  const total = e + v + m;
+  let totalScore = 0;
+  let anyNT = false;
+  
+  if (ent) anyNT = true; else totalScore += parseInt(eSlider.value);
+  if (vnt) anyNT = true; else totalScore += parseInt(vSlider.value);
+  if (mnt) anyNT = true; else totalScore += parseInt(mSlider.value);
+  
+  let totalText = '';
+  if (ent && vnt && mnt) {
+    totalText = 'NT';
+  } else if (anyNT) {
+    totalText = `${totalScore}+NT`;
+  } else {
+    totalText = totalScore;
+  }
+  
   const totalDisplay = document.getElementById('gcsTotalDisplay');
   if (totalDisplay) {
-    totalDisplay.innerText = `GCS ${total} (E${e} V${v} M${m})`;
+    totalDisplay.innerText = `GCS ${totalText} (E${eVal} V${vVal} M${mVal})`;
   }
   
   const assessGcsInput = document.getElementById('assessGcs');
   if (assessGcsInput) {
-    assessGcsInput.value = `${total} (E${e}V${v}M${m})`;
+    assessGcsInput.value = `${totalText} (E${eVal}V${vVal}M${mVal})`;
   }
+  
+  updateTriageSuggestion();
+}
+
+// Physiological pre-judgment based on clinical vitals criteria
+let currentSuggestedTriage = null;
+
+function predictTriageFromVitals() {
+  const ent = document.getElementById('gcsENT').checked;
+  const vnt = document.getElementById('gcsVNT').checked;
+  const mnt = document.getElementById('gcsMNT').checked;
+  const e = parseInt(document.getElementById('gcsE').value) || 4;
+  const v = parseInt(document.getElementById('gcsV').value) || 5;
+  const m = parseInt(document.getElementById('gcsM').value) || 6;
+  const gcsTotal = ent || vnt || mnt ? null : (e + v + m);
+  
+  const spo2Input = document.getElementById('assessSpo2');
+  const sbpInput = document.getElementById('assessBpSys');
+  const hrInput = document.getElementById('assessHr');
+  const rrInput = document.getElementById('assessRr');
+  const tempInput = document.getElementById('assessTemp');
+  
+  const spo2 = spo2Input && spo2Input.value ? parseInt(spo2Input.value) : null;
+  const sbp = sbpInput && sbpInput.value ? parseInt(sbpInput.value) : null;
+  const hr = hrInput && hrInput.value ? parseInt(hrInput.value) : null;
+  const rr = rrInput && rrInput.value ? parseInt(rrInput.value) : null;
+  const temp = tempInput && tempInput.value ? parseFloat(tempInput.value) : null;
+  
+  // If NO values are entered at all, return null
+  if (gcsTotal === null && spo2 === null && sbp === null && hr === null && rr === null) {
+    return null;
+  }
+  
+  // 1. Black (Deceased)
+  if (rr === 0 && hr === 0) {
+    return 'black';
+  }
+  
+  // 2. Red (Immediate / 🔴)
+  if (
+    (gcsTotal !== null && gcsTotal <= 8) ||                     // Coma / Severe brain injury
+    (spo2 !== null && spo2 < 90) ||                             // Severe hypoxemia
+    (sbp !== null && sbp < 90) ||                               // Shock (Systolic BP < 90)
+    (rr !== null && (rr >= 30 || rr < 10)) ||                   // Severe tachypnea/apnea
+    (hr !== null && (hr >= 120 || hr < 50))                     // Severe tachycardia/bradycardia
+  ) {
+    return 'red';
+  }
+  
+  // 3. Yellow (Delayed / 🟡)
+  if (
+    (gcsTotal !== null && gcsTotal >= 9 && gcsTotal <= 13) ||   // Moderate neurological distress
+    (spo2 !== null && spo2 >= 90 && spo2 <= 94) ||              // Mild hypoxemia
+    (sbp !== null && sbp >= 90 && sbp < 100) ||                 // Borderline low BP
+    (rr !== null && ((rr >= 21 && rr <= 29) || rr === 10 || rr === 11)) || // Mild tachypnea
+    (hr !== null && ((hr >= 100 && hr <= 119) || (hr >= 50 && hr <= 59)))   // Mild heart distress
+  ) {
+    return 'yellow';
+  }
+  
+  // 4. Green (Minor / 🟢)
+  return 'green';
+}
+
+function updateTriageSuggestion() {
+  const predicted = predictTriageFromVitals();
+  currentSuggestedTriage = predicted;
+  
+  const label = document.getElementById('suggestedTriageLabel');
+  const btn = document.getElementById('applyTriageSuggestionBtn');
+  
+  if (!label || !btn) return;
+  
+  if (predicted) {
+    let text = '-';
+    let colorHex = 'var(--text-muted)';
+    
+    if (predicted === 'red') { text = '🔴 立即 (紅)'; colorHex = 'var(--triage-red)'; }
+    else if (predicted === 'yellow') { text = '🟡 延遲 (黃)'; colorHex = 'var(--triage-yellow)'; }
+    else if (predicted === 'green') { text = '🟢 輕傷 (綠)'; colorHex = 'var(--triage-green)'; }
+    else if (predicted === 'black') { text = '⚫ 死亡 (黑)'; colorHex = 'var(--triage-black)'; }
+    
+    label.innerText = text;
+    label.style.color = colorHex;
+    btn.style.display = 'inline-block';
+  } else {
+    label.innerText = '-';
+    label.style.color = 'var(--text-muted)';
+    btn.style.display = 'none';
+  }
+}
+
+function applySuggestedTriage() {
+  if (currentSuggestedTriage) {
+    setAssessTriage(currentSuggestedTriage);
+    playBeep('success');
+  }
+}
+
+// Insert time stamp at cursor in the clinical notes textarea
+function insertNoteTimestamp() {
+  const textarea = document.getElementById('assessNotes');
+  if (!textarea) return;
+  
+  const now = new Date();
+  const timeStr = `[${now.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' })}] `;
+  
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  
+  textarea.value = text.substring(0, start) + timeStr + text.substring(end);
+  
+  // Set focus and put cursor after the timestamp
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = start + timeStr.length;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
