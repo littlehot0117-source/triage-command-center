@@ -803,8 +803,9 @@ function openTreatmentRecordModal(patientId) {
   document.getElementById('recPhone').innerText = t.phone || '未填寫';
   
   const genderZh = t.gender === 'male' ? '生理男' : t.gender === 'female' ? '生理女' : '不詳';
-  const ageZh = t.ageGroup === 'child' ? '兒童' : '成人';
-  document.getElementById('recGenderAge').innerText = `${genderZh} / ${ageZh}`;
+  const dobText = t.dob ? t.dob : '未填生日';
+  const ageText = t.age ? `${t.age} 歲` : '未填年齡';
+  document.getElementById('recGenderAge').innerText = `${genderZh} / ${ageText} (${dobText})`;
   
   // Location
   const locDiv = document.getElementById('recLocation');
@@ -829,14 +830,22 @@ function openTreatmentRecordModal(patientId) {
   setVitalWarningStyle('vitalRrBox', vitals.rr && (parseInt(vitals.rr) < 10 || parseInt(vitals.rr) > 29));
   setVitalWarningStyle('vitalTempBox', vitals.temp && (parseFloat(vitals.temp) < 35.0 || parseFloat(vitals.temp) > 38.5));
   
-  // Injured Parts
+  // Injured Parts with injury annotations
   const partsContainer = document.getElementById('recInjuredPartsContainer');
   if (t.injuredParts && t.injuredParts.length > 0) {
-    partsContainer.innerHTML = t.injuredParts.map(part => `
-      <span style="background: rgba(16,185,129,0.1); border: 1px solid #10b981; color: #10b981; padding: 4px 10px; border-radius: 4px; font-size:12px; font-weight:600;">
-        ${part}
-      </span>
-    `).join('');
+    const notesMap = t.injuredPartsNotes || {};
+    partsContainer.innerHTML = t.injuredParts.map(part => {
+      const noteStr = notesMap[part] ? `：${notesMap[part]}` : '';
+      const isNone = part === '無明顯外傷';
+      const colorBg = isNone ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+      const colorBorder = isNone ? '#10b981' : '#ef4444';
+      
+      return `
+        <span style="background: ${colorBg}; border: 1px solid ${colorBorder}; color: ${colorBorder}; padding: 4px 10px; border-radius: 4px; font-size:12px; font-weight:600; margin-bottom: 4px; display: inline-flex; align-items: center; gap: 4px;">
+          ${part}${noteStr}
+        </span>
+      `;
+    }).join(' ');
   } else {
     partsContainer.innerHTML = `<span style="color:var(--text-muted); font-size:13px;">無外傷資料</span>`;
   }

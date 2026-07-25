@@ -75,7 +75,7 @@
         <div class="modal-header" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;">
           <div style="display:flex; align-items:center; gap:8px;">
             <i data-lucide="heart-pulse" style="color: #10b981; width: 22px; height: 22px;"></i>
-            <span id="assessmentModalTitle" style="font-weight:700; font-size:18px; color: var(--text-main);">臨床病歷登錄</span>
+            <span id="assessmentModalTitle" style="font-weight:700; font-size:18px; color: var(--text-main);">治療區</span>
           </div>
           <button type="button" onclick="closeAssessmentModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
             <i data-lucide="x" style="width:20px; height:20px;"></i>
@@ -90,27 +90,23 @@
             一、 傷患基本資料
           </div>
 
-          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px;">
-            <div class="form-group">
+          <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:12px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
               <label for="assessName">姓名</label>
-              <input type="text" id="assessName" class="input-control" placeholder="輸入姓名 (可留空)">
+              <input type="text" id="assessName" class="input-control" placeholder="姓名 (可空)">
             </div>
-            <div class="form-group">
-              <label>生理年齡層</label>
-              <div class="toggle-btn-group" style="display:flex; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden;">
-                <button type="button" class="btn btn-secondary assess-age-btn" id="assessAgeAdult" onclick="selectAssessAge('adult')" style="flex:1; padding:8px 0; font-size:12px; border:none; border-radius:0;">成人</button>
-                <button type="button" class="btn btn-secondary assess-age-btn" id="assessAgeChild" onclick="selectAssessAge('child')" style="flex:1; padding:8px 0; font-size:12px; border:none; border-radius:0;">兒童</button>
-              </div>
-              <input type="hidden" id="assessAgeGroup">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessDob">出生年月日</label>
+              <input type="date" id="assessDob" class="input-control" onchange="calculateAgeFromDob()" style="color-scheme: dark;">
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px;">
-            <div class="form-group">
-              <label for="assessNationalId">身分證字號</label>
-              <input type="text" id="assessNationalId" class="input-control" placeholder="身分證字號" style="text-transform:uppercase;">
+          <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:12px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessAge">年齡 (歲)</label>
+              <input type="number" id="assessAge" class="input-control" placeholder="生日估算或手動" min="0" max="150">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:0;">
               <label>生理性別</label>
               <div class="toggle-btn-group" style="display:flex; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden;">
                 <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderMale" onclick="selectAssessGender('male')" style="flex:1; padding:8px 0; font-size:12px; border:none; border-radius:0;">男</button>
@@ -121,26 +117,94 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="assessPhone">聯絡電話</label>
-            <input type="tel" id="assessPhone" class="input-control" placeholder="輸入電話號碼">
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessNationalId">身分證字號</label>
+              <input type="text" id="assessNationalId" class="input-control" placeholder="身分證字號" style="text-transform:uppercase;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessPhone">聯絡電話</label>
+              <input type="tel" id="assessPhone" class="input-control" placeholder="聯絡電話">
+            </div>
           </div>
 
           <!-- Section 2: Injured Parts -->
           <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
-            二、 受傷部位 (多選)
+            二、 受傷部位 (點擊人形圖標記並可註記傷情)
           </div>
-          <div class="injured-parts-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:16px;">
-            <button type="button" class="part-checkbox-btn" id="partHead" onclick="toggleInjuredPart('頭部')">頭部</button>
-            <button type="button" class="part-checkbox-btn" id="partNeck" onclick="toggleInjuredPart('頸部')">頸部</button>
-            <button type="button" class="part-checkbox-btn" id="partChest" onclick="toggleInjuredPart('胸部')">胸部</button>
-            <button type="button" class="part-checkbox-btn" id="partAbdomen" onclick="toggleInjuredPart('腹部')">腹部</button>
-            <button type="button" class="part-checkbox-btn" id="partPelvis" onclick="toggleInjuredPart('骨盆')">骨盆</button>
-            <button type="button" class="part-checkbox-btn" id="partLimbs" onclick="toggleInjuredPart('四肢肢體')">四肢肢體</button>
-            <button type="button" class="part-checkbox-btn" id="partBack" onclick="toggleInjuredPart('背部脊椎')">背部脊椎</button>
-            <button type="button" class="part-checkbox-btn" id="partBurns" onclick="toggleInjuredPart('燒燙傷')">燒燙傷</button>
-            <button type="button" class="part-checkbox-btn" id="partNone" onclick="toggleInjuredPart('無明顯外傷')">無外傷</button>
+          
+          <div style="display:flex; justify-content:space-around; align-items:center; background: rgba(0,0,0,0.15); border:1px solid var(--border-color); border-radius: var(--radius-sm); padding:10px 4px; margin-bottom:12px;">
+            
+            <!-- Front View (正面) -->
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted);">正面 (Front)</span>
+              <svg width="100" height="210" viewBox="0 0 100 210" style="overflow:visible;">
+                <style>
+                  .mq-part { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.3); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+                  .mq-part:hover { fill: rgba(16, 185, 129, 0.25); stroke: #10b981; }
+                  .mq-part.active { fill: rgba(239, 68, 68, 0.45); stroke: #ef4444; filter: drop-shadow(0 0 3px rgba(239,68,68,0.5)); }
+                </style>
+                <!-- Head -->
+                <circle id="mq-Head" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部')"></circle>
+                <!-- Neck -->
+                <rect id="mq-Neck" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部')"></rect>
+                <!-- Chest -->
+                <rect id="mq-Chest" class="mq-part" x="33" y="48" width="34" height="26" rx="4" onclick="toggleInjuredPart('胸部')"></rect>
+                <!-- Abdomen -->
+                <rect id="mq-Abdomen" class="mq-part" x="35" y="76" width="30" height="20" rx="2" onclick="toggleInjuredPart('腹部')"></rect>
+                <!-- Pelvis -->
+                <polygon id="mq-Pelvis" class="mq-part" points="35,98 65,98 61,114 39,114" onclick="toggleInjuredPart('骨盆')"></polygon>
+                
+                <!-- Left Upper Limb -->
+                <rect id="mq-Limbs-Larm" class="mq-part" x="14" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Right Upper Limb -->
+                <rect id="mq-Limbs-Rarm" class="mq-part" x="70" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                
+                <!-- Left Lower Limb -->
+                <rect id="mq-Limbs-Lleg" class="mq-part" x="34" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Right Lower Limb -->
+                <rect id="mq-Limbs-Rleg" class="mq-part" x="52" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+              </svg>
+            </div>
+
+            <!-- Back View (背面) -->
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted);">背面 (Back)</span>
+              <svg width="100" height="210" viewBox="0 0 100 210" style="overflow:visible;">
+                <!-- Head (Back) -->
+                <circle id="mq-Head-back" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部')"></circle>
+                <!-- Neck (Back) -->
+                <rect id="mq-Neck-back" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部')"></rect>
+                <!-- Back/Spine (背部脊椎) -->
+                <rect id="mq-Back" class="mq-part" x="33" y="48" width="34" height="50" rx="4" onclick="toggleInjuredPart('背部脊椎')"></rect>
+                <!-- Pelvis/Glute (Back) -->
+                <polygon id="mq-Pelvis-back" class="mq-part" points="35,100 65,100 61,114 39,114" onclick="toggleInjuredPart('骨盆')"></polygon>
+                
+                <!-- Left Upper Limb (Back) -->
+                <rect id="mq-Limbs-Larm-back" class="mq-part" x="14" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Right Upper Limb (Back) -->
+                <rect id="mq-Limbs-Rarm-back" class="mq-part" x="70" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                
+                <!-- Left Lower Limb (Back) -->
+                <rect id="mq-Limbs-Lleg-back" class="mq-part" x="34" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Right Lower Limb (Back) -->
+                <rect id="mq-Limbs-Rleg-back" class="mq-part" x="52" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+              </svg>
+            </div>
           </div>
+
+          <!-- Quick Select and Clear Actions -->
+          <div style="display:flex; justify-content:space-between; margin-bottom:12px; gap:8px;">
+            <button type="button" class="btn btn-secondary" onclick="toggleInjuredPart('無明顯外傷')" id="partNoneBtn" style="flex:1; padding:6px 0; font-size:12px; height:32px;">無明顯外傷</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleInjuredPart('燒燙傷')" id="partBurnsBtn" style="flex:1; padding:6px 0; font-size:12px; height:32px;">全身燒燙傷</button>
+            <button type="button" class="btn btn-secondary" onclick="clearInjuredParts()" style="flex:1; padding:6px 0; font-size:12px; height:32px; color:var(--text-muted);">重設部位</button>
+          </div>
+
+          <!-- Injured Parts Notes Annotations Container -->
+          <div id="injuredPartsNotesContainer" style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; min-height: 48px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; color:var(--text-muted); text-align:center; padding:6px 0;">點擊上方人體部位以開啟傷勢備註</div>
+          </div>
+
 
           <!-- Section 3: Vital Signs -->
           <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">

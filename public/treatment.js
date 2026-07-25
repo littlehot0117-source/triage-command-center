@@ -10,6 +10,22 @@ let searchFilter = '';
 let socket = null;
 let hasWebSocket = false;
 let selectedInjuredParts = new Set();
+let injuredPartsNotes = {};
+
+const mannequinSelectorMap = {
+  '頭部': ['mq-Head', 'mq-Head-back'],
+  '頸部': ['mq-Neck', 'mq-Neck-back'],
+  '胸部': ['mq-Chest'],
+  '腹部': ['mq-Abdomen'],
+  '骨盆': ['mq-Pelvis', 'mq-Pelvis-back'],
+  '背部脊椎': ['mq-Back'],
+  '四肢肢體': [
+    'mq-Limbs-Larm', 'mq-Limbs-Rarm', 
+    'mq-Limbs-Lleg', 'mq-Limbs-Rleg',
+    'mq-Limbs-Larm-back', 'mq-Limbs-Rarm-back', 
+    'mq-Limbs-Lleg-back', 'mq-Limbs-Rleg-back'
+  ]
+};
 let selectedTriageLevel = null;
 
 // Audio feedback context
@@ -324,14 +340,17 @@ function openAssessmentModal(patientId) {
   }
   
   document.getElementById('assessPatientId').value = patientId;
-  document.getElementById('assessmentModalTitle').innerText = `✏️ 臨床病歷登錄 - 患者 ${patientId} (第 ${nextCount} 次檢傷)`;
+  document.getElementById('assessmentModalTitle').innerText = `✏️ 治療區 - 患者 ${patientId} (第 ${nextCount} 次檢傷)`;
   
   // Initialize form fields
   selectedInjuredParts.clear();
+  injuredPartsNotes = {};
   document.getElementById('assessName').value = '';
   document.getElementById('assessNationalId').value = '';
   document.getElementById('assessPhone').value = '';
   document.getElementById('assessNotes').value = '';
+  document.getElementById('assessDob').value = '';
+  document.getElementById('assessAge').value = '';
   
   // GCS slider parsing initialization
   let gcsStr = '';
@@ -391,8 +410,9 @@ function openAssessmentModal(patientId) {
     document.getElementById('assessPhone').value = t.phone || '';
     document.getElementById('assessNotes').value = t.notes || '';
     
+    document.getElementById('assessDob').value = t.dob || '';
+    document.getElementById('assessAge').value = t.age || '';
     selectAssessGender(t.gender || 'unknown');
-    selectAssessAge(t.ageGroup || 'adult');
     
     if (t.vitals) {
       document.getElementById('assessBpSys').value = t.vitals.bpSystolic || '';
@@ -404,7 +424,12 @@ function openAssessmentModal(patientId) {
     }
     
     if (t.injuredParts) {
-      t.injuredParts.forEach(part => selectedInjuredParts.add(part));
+      t.injuredParts.forEach(x => selectedInjuredParts.add(x));
+    }
+    
+    injuredPartsNotes = {};
+    if (t.injuredPartsNotes) {
+      injuredPartsNotes = { ...t.injuredPartsNotes };
     }
     
     if (t.updatedTriageLevel) {
@@ -413,7 +438,11 @@ function openAssessmentModal(patientId) {
   } else {
     // Default initializations for new assessment
     selectAssessGender(p.gender || 'unknown');
-    selectAssessAge(p.ageGroup || 'adult');
+    if (p.ageGroup === 'child') {
+      document.getElementById('assessAge').value = '10';
+    } else if (p.ageGroup === 'adult') {
+      document.getElementById('assessAge').value = '30';
+    }
   }
   
   // Render toggles & checkbox buttons
@@ -441,14 +470,25 @@ function selectAssessGender(gender) {
   if (target) target.classList.add('active');
 }
 
-function selectAssessAge(age) {
-  document.getElementById('assessAgeGroup').value = age;
+function calculateAgeFromDob() {
+  const dobInput = document.getElementById('assessDob');
+  const ageInput = document.getElementById('assessAge');
+  if (!dobInput || !ageInput) return;
   
-  const btns = document.querySelectorAll('.assess-age-btn');
-  btns.forEach(b => b.classList.remove('active'));
+  const dobVal = dobInput.value;
+  if (!dobVal) return;
   
-  const target = document.getElementById('assessAge' + age.charAt(0).toUpperCase() + age.slice(1));
-  if (target) target.classList.add('active');
+  const dob = new Date(dobVal);
+  if (isNaN(dob.getTime())) return;
+  
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+  
+  ageInput.value = Math.max(0, age);
 }
 
 // Injured Parts Selection
@@ -458,12 +498,14 @@ function toggleInjuredPart(part) {
       selectedInjuredParts.delete('無明顯外傷');
     } else {
       selectedInjuredParts.clear();
+      injuredPartsNotes = {};
       selectedInjuredParts.add('無明顯外傷');
     }
   } else {
     selectedInjuredParts.delete('無明顯外傷');
     if (selectedInjuredParts.has(part)) {
       selectedInjuredParts.delete(part);
+      delete injuredPartsNotes[part];
     } else {
       selectedInjuredParts.add(part);
     }
@@ -472,30 +514,83 @@ function toggleInjuredPart(part) {
   updateInjuredPartsUI();
 }
 
+function clearInjuredParts() {
+  selectedInjuredParts.clear();
+  injuredPartsNotes = {};
+  updateInjuredPartsUI();
+}
+
 function updateInjuredPartsUI() {
-  const parts = ['Head', 'Neck', 'Chest', 'Abdomen', 'Pelvis', 'Limbs', 'Back', 'Burns', 'None'];
-  const partMap = {
-    'Head': '頭部', 'Neck': '頸部', 'Chest': '胸部', 'Abdomen': '腹部',
-    'Pelvis': '骨盆', 'Limbs': '四肢肢體', 'Back': '背部脊椎', 'Burns': '燒燙傷', 'None': '無明顯外傷'
-  };
+  // Clear active classes on all mannequin elements
+  const allParts = document.querySelectorAll('.mq-part');
+  allParts.forEach(el => el.classList.remove('active'));
   
-  parts.forEach(p => {
-    const btn = document.getElementById('part' + p);
-    if (btn) {
-      const dbVal = partMap[p];
-      if (selectedInjuredParts.has(dbVal)) {
-        btn.classList.add('active');
-        btn.style.background = 'rgba(16, 185, 129, 0.2)';
-        btn.style.borderColor = '#10b981';
-        btn.style.color = 'white';
-      } else {
-        btn.classList.remove('active');
-        btn.style.background = 'rgba(255, 255, 255, 0.05)';
-        btn.style.borderColor = 'var(--border-color)';
-        btn.style.color = 'var(--text-muted)';
-      }
+  // Add active classes to selected parts
+  selectedInjuredParts.forEach(part => {
+    const elIds = mannequinSelectorMap[part];
+    if (elIds) {
+      elIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+      });
     }
   });
+  
+  // Update button active state for quick selects
+  const burnsBtn = document.getElementById('partBurnsBtn');
+  const noneBtn = document.getElementById('partNoneBtn');
+  
+  if (burnsBtn) {
+    if (selectedInjuredParts.has('燒燙傷')) {
+      burnsBtn.style.background = 'rgba(239, 68, 68, 0.2)';
+      burnsBtn.style.borderColor = '#ef4444';
+      burnsBtn.style.color = 'white';
+    } else {
+      burnsBtn.style.background = '';
+      burnsBtn.style.borderColor = '';
+      burnsBtn.style.color = '';
+    }
+  }
+  
+  if (noneBtn) {
+    if (selectedInjuredParts.has('無明顯外傷')) {
+      noneBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+      noneBtn.style.borderColor = '#10b981';
+      noneBtn.style.color = 'white';
+    } else {
+      noneBtn.style.background = '';
+      noneBtn.style.borderColor = '';
+      noneBtn.style.color = '';
+    }
+  }
+  
+  // Render injury notes text areas!
+  renderInjuredPartsNotes();
+}
+
+function renderInjuredPartsNotes() {
+  const container = document.getElementById('injuredPartsNotesContainer');
+  if (!container) return;
+  
+  const activeParts = Array.from(selectedInjuredParts).filter(x => x !== '無明顯外傷');
+  if (activeParts.length === 0) {
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-muted); text-align:center; padding:6px 0;">點擊上方人體部位以開啟傷勢備註</div>`;
+    return;
+  }
+  
+  container.innerHTML = activeParts.map(part => {
+    const existingNote = injuredPartsNotes[part] || '';
+    return `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; font-weight:700; color:#ef4444; width:65px; text-align:right; white-space:nowrap;">${part}：</span>
+        <input type="text" class="input-control" value="${existingNote}" placeholder="輸入受傷情形 (如：撕裂傷、擦傷)" style="flex:1; font-size:12px; height:28px; padding:2px 8px;" oninput="updatePartNote('${part}', this.value)">
+      </div>
+    `;
+  }).join('');
+}
+
+function updatePartNote(part, value) {
+  injuredPartsNotes[part] = value;
 }
 
 // Vital Signs warnings
@@ -584,7 +679,9 @@ function saveAssessment(event) {
   const nationalId = document.getElementById('assessNationalId').value.trim().toUpperCase();
   const phone = document.getElementById('assessPhone').value.trim();
   const gender = document.getElementById('assessGender').value;
-  const ageGroup = document.getElementById('assessAgeGroup').value;
+  const dob = document.getElementById('assessDob').value;
+  const age = document.getElementById('assessAge').value.trim();
+  const ageGroup = (age && parseInt(age) < 18) ? 'child' : 'adult';
   
   const gcs = document.getElementById('assessGcs').value.trim();
   const bpSystolic = document.getElementById('assessBpSys').value.trim();
@@ -619,8 +716,11 @@ function saveAssessment(event) {
     nationalId,
     phone,
     gender,
+    dob,
+    age,
     ageGroup,
     injuredParts: Array.from(selectedInjuredParts),
+    injuredPartsNotes: { ...injuredPartsNotes },
     vitals: {
       gcs,
       bpSystolic,
