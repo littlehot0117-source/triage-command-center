@@ -1,0 +1,29 @@
+{
+  "name": "大傷監測與檢傷官系統",
+  "short_name": "大傷行動檢傷",
+  "description": "大量傷病患現場即時檢傷官與指揮中心系統",
+  "start_url": "officer.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#090d16",
+  "background_color": "#090d16",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
