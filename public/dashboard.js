@@ -276,7 +276,7 @@ function renderState() {
           <td><strong>${p.id}</strong></td>
           <td><span class="triage-badge ${p.triageLevel}">${getTriageZh(p.triageLevel)}</span></td>
           <td>${genderZh} | ${ageGroupZh} | ${p.description || '<span style="color:var(--text-muted)">無備註</span>'}</td>
-          <td><i data-lucide="map-pin" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>${p.location}</td>
+          <td>${formatLocation(p.location)}</td>
           <td>${timeStr}</td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openTransportModal('${p.id}')">
@@ -583,7 +583,7 @@ function updateHospitalPatientsModalData(hospitalName) {
           <td><strong>${p.id}</strong></td>
           <td><span class="triage-badge ${p.triageLevel}">${getTriageZh(p.triageLevel)}</span></td>
           <td>${genderZh} | ${ageGroupZh}</td>
-          <td><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:middle;margin-right:2px;"></i>${p.location}</td>
+          <td>${formatLocation(p.location)}</td>
           <td>${p.transportInfo.time}</td>
           <td>${p.description || '<span style="color:var(--text-muted)">無備註</span>'}</td>
         </tr>
@@ -749,3 +749,24 @@ document.addEventListener('DOMContentLoaded', () => {
     closeTransportModal();
   });
 });
+
+// Location GPS coordinates parser & Google Maps URL formatter
+function formatLocation(loc) {
+  if (!loc) return '<span style="color:var(--text-muted)">未知</span>';
+  
+  // Detects coordinates e.g. "23.4795, 120.4502"
+  const geoRegex = /(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/;
+  const match = loc.match(geoRegex);
+  
+  if (match) {
+    const lat = match[1];
+    const lng = match[2];
+    return `
+      <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" class="location-map-link" style="color:var(--primary); text-decoration:underline; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+        <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--primary);"></i>${loc}
+      </a>
+    `;
+  }
+  
+  return `<span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="map-pin" style="width:14px;height:14px;color:var(--text-muted);"></i>${loc}</span>`;
+}

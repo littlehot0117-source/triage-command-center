@@ -432,7 +432,7 @@ function renderHistory() {
               ${genderZh} | ${ageGroupZh}
             </div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
-              ${descText} | ${p.location}
+              ${descText} | ${formatLocationLink(p.location)}
             </div>
           </div>
           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">
@@ -704,6 +704,73 @@ function saveEditPatient() {
   renderHistory();
   closeEditPatientModal();
   alert(`已成功修改傷患 ${patientId} 的檢傷紀錄！`);
+}
+
+// GPS Positioning and Geolocation helpers
+function formatLocationLink(loc) {
+  if (!loc) return '現場';
+  const geoRegex = /(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/;
+  const match = loc.match(geoRegex);
+  
+  if (match) {
+    const lat = match[1];
+    const lng = match[2];
+    return `<a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" style="color:var(--primary); text-decoration:underline; font-weight:600; display:inline-flex; align-items:center; gap:2px;"><i data-lucide="map-pin" style="width:10px;height:10px;"></i>${loc}</a>`;
+  }
+  return loc;
+}
+
+function getCurrentGPS(inputId, btnId) {
+  const btn = document.getElementById(btnId);
+  const input = document.getElementById(inputId);
+  if (!btn || !input) return;
+  
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<span style="font-size:10px;">定位中...</span>';
+  btn.disabled = true;
+  
+  if (!navigator.geolocation) {
+    alert('您的瀏覽器不支援 GPS 定位功能！');
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+    return;
+  }
+  
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude.toFixed(6);
+      const lng = position.coords.longitude.toFixed(6);
+      
+      // Set the input field value to the latitude and longitude
+      input.value = `${lat}, ${lng}`;
+      
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+      
+      // Play audio feedback
+      playTriageBeep('success');
+      lucide.createIcons();
+    },
+    (error) => {
+      let errMsg = '定位失敗！';
+      if (error.code === error.PERMISSION_DENIED) {
+        errMsg = '定位失敗，請允許此網頁讀取您的 GPS 位置權限！';
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        errMsg = '無法獲取目前位置資訊！';
+      } else if (error.code === error.TIMEOUT) {
+        errMsg = '獲取定位逾時，請重試！';
+      }
+      alert(errMsg);
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+      playTriageBeep('error');
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
 }
 
 document.addEventListener('DOMContentLoaded', () => {
