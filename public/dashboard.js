@@ -312,38 +312,42 @@ function renderState() {
   vehicleList.innerHTML = vehicles.map(v => {
     let statusClass = 'standby';
     let statusZh = '現場<br>待命';
-    let actionBtn = `
-      <button class="btn btn-secondary" style="padding:4px 8px; font-size:11.5px; color:var(--triage-red); border:1px solid rgba(244,63,94,0.15);" onclick="removeVehicleById('${v.id}')">
-        移除
-      </button>
-    `;
+    let actionBtnHtml = '';
+    let removeBtnHtml = '';
 
     if (v.status === 'transporting') {
       statusClass = 'transporting';
       statusZh = `🚨 載送中 → ${v.hospitalName} (${v.patientId})`;
-      actionBtn = `
+      actionBtnHtml = `
         <button class="btn btn-secondary" style="padding:4px 8px; font-size:11.5px;" onclick="returnVehicle('${v.id}')">
           已返回現場
+        </button>
+      `;
+    } else {
+      removeBtnHtml = `
+        <button class="btn btn-secondary" style="padding:2px 6px; font-size:10px; color:var(--triage-red); border:1px solid rgba(244,63,94,0.15); margin-top:6px; line-height:1; min-height:18px; width:100%; white-space:nowrap; text-align:center;" onclick="removeVehicleById('${v.id}')">
+          移除
         </button>
       `;
     }
 
     return `
       <div class="item-row">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="display:flex; flex-direction:column; align-items:center; min-width:32px; gap:2px;">
+        <div style="display:flex; align-items:center; gap:10px; width:100%;">
+          <div style="display:flex; flex-direction:column; align-items:center; min-width:44px; gap:2px;">
             <i data-lucide="ambulance" style="color: ${v.status === 'transporting' ? 'var(--triage-red)' : 'var(--triage-green)'};"></i>
             <span style="font-size:10px; font-weight:600; color:var(--text-muted); padding:1px 4px; background:rgba(255,255,255,0.03); border-radius:3px; border:1px solid rgba(255,255,255,0.05); white-space:nowrap; margin-top:2px;">
               ${v.transportCount || 0} 次
             </span>
+            ${removeBtnHtml}
           </div>
-          <div>
+          <div style="flex:1;">
             <div style="font-weight:600;">${v.name}</div>
             <div style="font-size:12px; color:var(--text-muted);" class="vehicle-status ${statusClass}">${statusZh}</div>
           </div>
         </div>
-        <div>
-          ${actionBtn}
+        <div style="white-space:nowrap;">
+          ${actionBtnHtml}
         </div>
       </div>
     `;

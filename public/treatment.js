@@ -178,8 +178,8 @@ function renderPatientsList() {
   // i.e., patients who are not yet transported!
   const scenePatients = systemState.patients.filter(p => p.status === 'waiting' || p.status === 'triage' || !p.status);
   
-  const waitingPatients = scenePatients.filter(p => !p.treatmentInfo);
-  const assessedPatients = scenePatients.filter(p => p.treatmentInfo);
+  const waitingPatients = scenePatients.filter(p => !p.treatmentInfo || p.treatmentInfo.assessmentStatus === 'waiting');
+  const assessedPatients = scenePatients.filter(p => p.treatmentInfo && p.treatmentInfo.assessmentStatus === 'assessed');
   
   // Update badges counts
   document.getElementById('waitingCount').innerText = waitingPatients.length;
@@ -226,6 +226,10 @@ function renderPatientsList() {
             <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
               描述: ${p.description || '無描述'}
             </div>
+            <div style="font-size:11px; color:var(--triage-yellow); margin-top:5px; font-weight:600; display:flex; align-items:center; gap:4px;">
+              <i data-lucide="refresh-cw" style="width:11px; height:11px;"></i>
+              檢傷次數: ${p.treatmentInfo && p.treatmentInfo.assessmentCount ? p.treatmentInfo.assessmentCount : 1} 次
+            </div>
           </div>
           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end;">
             <span class="triage-badge ${p.triageLevel}" style="font-size:10px; padding:3px 8px;">${getTriageLabel(p.triageLevel)}</span>
@@ -268,10 +272,18 @@ function renderPatientsList() {
             <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">
               ${vitalsPreviewStr}
             </div>
+            <div style="font-size:11px; color:var(--triage-yellow); margin-top:5px; font-weight:600; display:flex; align-items:center; gap:4px;">
+              <i data-lucide="refresh-cw" style="width:11px; height:11px;"></i>
+              檢傷次數: ${t.assessmentCount || 2} 次
+            </div>
           </div>
-          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; min-width:80px;">
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; min-width:90px;">
             <span class="triage-badge ${p.triageLevel}" style="font-size:10px; padding:3px 8px;">${getTriageLabel(p.triageLevel)}</span>
             <div style="font-size:10px; color:var(--text-muted); margin-top:6px;">${timeStr}</div>
+            <div class="countdown-timer" data-patient-id="${p.id}" style="font-size:11px; font-weight:700; color:var(--triage-yellow); margin-top:6px; display:flex; align-items:center; gap:4px;">
+              <i data-lucide="clock" style="width:12px; height:12px;"></i>
+              <span class="timer-countdown-text">05:00</span>
+            </div>
           </div>
         </div>
       `;
@@ -302,8 +314,17 @@ function openAssessmentModal(patientId) {
   const p = systemState.patients.find(x => x.id === patientId);
   if (!p) return;
   
+  let currentCount = 1;
+  if (p.treatmentInfo && p.treatmentInfo.assessmentCount) {
+    currentCount = p.treatmentInfo.assessmentCount;
+  }
+  let nextCount = currentCount;
+  if (!p.treatmentInfo || p.treatmentInfo.assessmentStatus === 'waiting') {
+    nextCount = currentCount + 1;
+  }
+  
   document.getElementById('assessPatientId').value = patientId;
-  document.getElementById('assessmentModalTitle').innerText = `✏️ 臨床病歷登錄 - 患者 ${patientId}`;
+  document.getElementById('assessmentModalTitle').innerText = `✏️ 臨床病歷登錄 - 患者 ${patientId} (第 ${nextCount} 次檢傷)`;
   
   // Initialize form fields
   selectedInjuredParts.clear();
@@ -584,6 +605,15 @@ function saveAssessment(event) {
   }
   const triageLevel = selectedTriageLevel;
   
+  const p = systemState.patients.find(x => x.id === patientId);
+  let assessmentCount = 1;
+  if (p && p.treatmentInfo && p.treatmentInfo.assessmentCount) {
+    assessmentCount = p.treatmentInfo.assessmentCount;
+  }
+  if (!p || !p.treatmentInfo || p.treatmentInfo.assessmentStatus === 'waiting') {
+    assessmentCount += 1;
+  }
+
   const treatmentInfo = {
     name,
     nationalId,
@@ -602,7 +632,10 @@ function saveAssessment(event) {
     },
     updatedTriageLevel: triageLevel,
     notes,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
+    assessmentStatus: 'assessed',
+    assessmentCount: assessmentCount,
+    assessmentCompletedAt: Date.now()
   };
   
   const payload = {
@@ -792,7 +825,61 @@ function insertNoteTimestamp() {
   textarea.selectionStart = textarea.selectionEnd = start + timeStr.length;
 }
 
+// Global Timer for Re-assessment Countdown
+let countdownInterval = null;
+
+function startCountdownTimer() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  countdownInterval = setInterval(() => {
+    let stateChanged = false;
+    if (!systemState.patients) return;
+    
+    const now = Date.now();
+    const limitMs = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    systemState.patients.forEach(p => {
+      if (p.treatmentInfo && p.treatmentInfo.assessmentStatus === 'assessed') {
+        const completedAt = p.treatmentInfo.assessmentCompletedAt || now;
+        const elapsed = now - completedAt;
+        const remaining = Math.max(0, limitMs - elapsed);
+        
+        // Update UI if element is visible
+        const timerEl = document.querySelector(`.countdown-timer[data-patient-id="${p.id}"] .timer-countdown-text`);
+        if (timerEl) {
+          const totalSec = Math.ceil(remaining / 1000);
+          const mins = Math.floor(totalSec / 60);
+          const secs = totalSec % 60;
+          timerEl.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+          
+          if (totalSec < 60) {
+            timerEl.parentElement.style.color = 'var(--triage-red)';
+            timerEl.parentElement.style.fontWeight = '800';
+          } else {
+            timerEl.parentElement.style.color = 'var(--triage-yellow)';
+          }
+        }
+        
+        if (remaining === 0) {
+          p.treatmentInfo.assessmentStatus = 'waiting';
+          const payload = {
+            id: p.id,
+            treatmentInfo: p.treatmentInfo
+          };
+          sendAction('UPDATE_PATIENT', payload);
+          stateChanged = true;
+        }
+      }
+    });
+    
+    if (stateChanged) {
+      renderPatientsList();
+    }
+  }, 1000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initConnection();
   lucide.createIcons();
+  startCountdownTimer();
 });
