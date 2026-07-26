@@ -90,41 +90,45 @@
             一、 傷患基本資料
           </div>
 
-          <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:12px; margin-bottom:10px;">
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; margin-bottom:10px;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessName">姓名</label>
-              <input type="text" id="assessName" class="input-control" placeholder="姓名 (可空)">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="assessDob">出生年月日</label>
-              <input type="date" id="assessDob" class="input-control" onchange="calculateAgeFromDob()" style="color-scheme: dark;">
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:12px; margin-bottom:10px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="assessAge">年齡 (歲)</label>
-              <input type="number" id="assessAge" class="input-control" placeholder="生日估算或手動" min="0" max="150">
+              <input type="text" id="assessName" class="input-control" placeholder="姓名 (可空)" style="height:38px;">
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label>生理性別</label>
-              <div class="toggle-btn-group" style="display:flex; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden;">
-                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderMale" onclick="selectAssessGender('male')" style="flex:1; padding:8px 0; font-size:12px; border:none; border-radius:0;">男</button>
-                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderFemale" onclick="selectAssessGender('female')" style="flex:1; padding:8px 0; font-size:12px; border:none; border-radius:0;">女</button>
-                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderUnknown" onclick="selectAssessGender('unknown')" style="flex:1; padding:8px 0; font-size:12px; border:none; border-radius:0;">不詳</button>
+              <div class="toggle-btn-group" style="display:flex; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; height:38px;">
+                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderMale" onclick="selectAssessGender('male')" style="flex:1; padding:0; font-size:12px; border:none; border-radius:0;">男</button>
+                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderFemale" onclick="selectAssessGender('female')" style="flex:1; padding:0; font-size:12px; border:none; border-radius:0;">女</button>
+                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderUnknown" onclick="selectAssessGender('unknown')" style="flex:1; padding:0; font-size:12px; border:none; border-radius:0;">不詳</button>
               </div>
               <input type="hidden" id="assessGender">
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px;">
+          <div style="display:grid; grid-template-columns: 1.5fr 0.7fr; gap:12px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>出生年月日</label>
+              <div style="display:flex; gap:4px;">
+                <select id="assessDobYear" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:2.2; font-size:11px; height:38px; padding:2px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobMonth" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobDay" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius: 4px;"></select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessAge">年齡 (歲)</label>
+              <input type="number" id="assessAge" class="input-control" placeholder="年齡" min="0" max="150" style="height:38px;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; margin-bottom:10px;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessNationalId">身分證字號</label>
-              <input type="text" id="assessNationalId" class="input-control" placeholder="身分證字號" style="text-transform:uppercase;">
+              <input type="text" id="assessNationalId" class="input-control" placeholder="身分證字號" style="text-transform:uppercase; height:38px;">
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessPhone">聯絡電話</label>
-              <input type="tel" id="assessPhone" class="input-control" placeholder="聯絡電話">
+              <input type="tel" id="assessPhone" class="input-control" placeholder="聯絡電話" style="height:38px;">
             </div>
           </div>
 
@@ -155,15 +159,23 @@
                 <!-- Pelvis -->
                 <polygon id="mq-Pelvis" class="mq-part" points="35,98 65,98 61,114 39,114" onclick="toggleInjuredPart('骨盆')"></polygon>
                 
-                <!-- Left Upper Limb -->
-                <rect id="mq-Limbs-Larm" class="mq-part" x="14" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
-                <!-- Right Upper Limb -->
-                <rect id="mq-Limbs-Rarm" class="mq-part" x="70" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Left Upper Limb parts -->
+                <rect id="mq-Larm-upper" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂')" title="左上臂"></rect>
+                <rect id="mq-Larm-fore" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂')" title="左前臂"></rect>
+                <circle id="mq-Lhand" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手')" title="左手"></circle>
                 
-                <!-- Left Lower Limb -->
-                <rect id="mq-Limbs-Lleg" class="mq-part" x="34" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
-                <!-- Right Lower Limb -->
-                <rect id="mq-Limbs-Rleg" class="mq-part" x="52" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Right Upper Limb parts -->
+                <rect id="mq-Rarm-upper" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂')" title="右上臂"></rect>
+                <rect id="mq-Rarm-fore" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂')" title="右前臂"></rect>
+                <circle id="mq-Rhand" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手')" title="右手"></circle>
+                
+                <!-- Left Lower Limb parts -->
+                <rect id="mq-Lleg-thigh" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿')" title="左大腿"></rect>
+                <rect id="mq-Lleg-shin" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿')" title="左小腿"></rect>
+                
+                <!-- Right Lower Limb parts -->
+                <rect id="mq-Rleg-thigh" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿')" title="右大腿"></rect>
+                <rect id="mq-Rleg-shin" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿')" title="右小腿"></rect>
               </svg>
             </div>
 
@@ -180,15 +192,23 @@
                 <!-- Pelvis/Glute (Back) -->
                 <polygon id="mq-Pelvis-back" class="mq-part" points="35,100 65,100 61,114 39,114" onclick="toggleInjuredPart('骨盆')"></polygon>
                 
-                <!-- Left Upper Limb (Back) -->
-                <rect id="mq-Limbs-Larm-back" class="mq-part" x="14" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
-                <!-- Right Upper Limb (Back) -->
-                <rect id="mq-Limbs-Rarm-back" class="mq-part" x="70" y="48" width="16" height="52" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Left Upper Limb parts (Back) -->
+                <rect id="mq-Larm-upper-back" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂')" title="左上臂"></rect>
+                <rect id="mq-Larm-fore-back" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂')" title="左前臂"></rect>
+                <circle id="mq-Lhand-back" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手')" title="左手"></circle>
                 
-                <!-- Left Lower Limb (Back) -->
-                <rect id="mq-Limbs-Lleg-back" class="mq-part" x="34" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
-                <!-- Right Lower Limb (Back) -->
-                <rect id="mq-Limbs-Rleg-back" class="mq-part" x="52" y="117" width="14" height="78" rx="6" onclick="toggleInjuredPart('四肢肢體')"></rect>
+                <!-- Right Upper Limb parts (Back) -->
+                <rect id="mq-Rarm-upper-back" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂')" title="右上臂"></rect>
+                <rect id="mq-Rarm-fore-back" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂')" title="右前臂"></rect>
+                <circle id="mq-Rhand-back" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手')" title="右手"></circle>
+                
+                <!-- Left Lower Limb parts (Back) -->
+                <rect id="mq-Lleg-thigh-back" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿')" title="左大腿"></rect>
+                <rect id="mq-Lleg-shin-back" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿')" title="左小腿"></rect>
+                
+                <!-- Right Lower Limb parts (Back) -->
+                <rect id="mq-Rleg-thigh-back" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿')" title="右大腿"></rect>
+                <rect id="mq-Rleg-shin-back" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿')" title="右小腿"></rect>
               </svg>
             </div>
           </div>
@@ -311,10 +331,89 @@
           </div>
           <input type="hidden" id="assessTriageLevel">
 
-          <!-- Section 5: Clinical Notes -->
+          <!-- Section 5: Medications Record -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
+            五、 治療用藥紀錄 (Medications)
+          </div>
+          
+          <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+            <!-- Input Row -->
+            <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:8px; margin-bottom:8px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">給藥時間</label>
+                <input type="time" id="medTime" class="input-control" style="font-size:12px; height:32px; color-scheme: dark; padding: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">藥物名稱</label>
+                <select id="medName" class="input-control" style="font-size:12px; height:32px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                  <option value="Amiodarone">Amiodarone</option>
+                  <option value="D10W">D10W</option>
+                  <option value="D50W">D50W</option>
+                  <option value="Epinephrine">Epinephrine</option>
+                  <option value="N/S">N/S</option>
+                  <option value="NTG">NTG</option>
+                  <option value="Tramadol">Tramadol</option>
+                  <option value="Transamin">Transamin</option>
+                </select>
+              </div>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:8px; margin-bottom:8px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">給藥途徑</label>
+                <select id="medRoute" class="input-control" style="font-size:12px; height:32px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                  <option value="IV">IV</option>
+                  <option value="IO">IO</option>
+                  <option value="口服">口服</option>
+                  <option value="舌下">舌下</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">藥物劑量</label>
+                <div style="display:flex; gap:4px;">
+                  <input type="number" id="medDoseVal" class="input-control" placeholder="劑量" style="flex:1; font-size:12px; height:32px; padding: 4px;">
+                  <select id="medDoseUnit" class="input-control" style="width:65px; font-size:12px; height:32px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                    <option value="mg">mg</option>
+                    <option value="ml">ml</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:8px; align-items:flex-end;">
+              <div class="form-group" style="margin-bottom:0; flex:1;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">用藥備註</label>
+                <input type="text" id="medRemark" class="input-control" placeholder="用藥註記..." style="font-size:12px; height:32px; padding: 4px;">
+              </div>
+              <button type="button" onclick="addMedicationRecord()" class="btn btn-primary" style="padding:0 12px; height:32px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:4px; background:var(--primary-gradient); border:none; color:white; border-radius: 4px; cursor:pointer;">
+                <i data-lucide="plus" style="width:14px; height:14px;"></i> 新增
+              </button>
+            </div>
+            
+            <!-- Medications Table List -->
+            <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px; max-height: 120px; overflow-y: auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted);">
+                    <th style="padding:4px 2px;">時間</th>
+                    <th style="padding:4px 2px;">藥物名稱</th>
+                    <th style="padding:4px 2px;">途徑</th>
+                    <th style="padding:4px 2px;">劑量</th>
+                    <th style="padding:4px 2px;">備註</th>
+                    <th style="padding:4px 2px; text-align:center; width:30px;">刪除</th>
+                  </tr>
+                </thead>
+                <tbody id="medicationListBody">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 6: Clinical Notes -->
           <div class="form-group" style="margin-top: 16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label for="assessNotes" style="margin-bottom:0;">臨床備註/用藥處置</label>
+              <label for="assessNotes" style="margin-bottom:0;">臨床備註與處置說明</label>
               <button type="button" onclick="insertNoteTimestamp()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-family:var(--font-body);">
                 <i data-lucide="clock" style="width:12px; height:12px;"></i> 插入時間戳記
               </button>

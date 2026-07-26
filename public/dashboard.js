@@ -850,6 +850,24 @@ function openTreatmentRecordModal(patientId) {
     partsContainer.innerHTML = `<span style="color:var(--text-muted); font-size:13px;">無外傷資料</span>`;
   }
   
+  // Medications Log
+  const recMedBody = document.getElementById('recMedicationsListBody');
+  if (recMedBody) {
+    if (t.medications && t.medications.length > 0) {
+      recMedBody.innerHTML = t.medications.map(m => `
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:6px 4px;">${m.time}</td>
+          <td style="padding:6px 4px; font-weight:700; color:#10b981;">${m.name}</td>
+          <td style="padding:6px 4px;">${m.route}</td>
+          <td style="padding:6px 4px; font-weight:700;">${m.dose}</td>
+          <td style="padding:6px 4px; color:var(--text-muted);">${m.remark || '-'}</td>
+        </tr>
+      `).join('');
+    } else {
+      recMedBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:12px 0;">目前無用藥紀錄</td></tr>`;
+    }
+  }
+  
   // Secondary Triage
   const secTriage = t.updatedTriageLevel || p.triageLevel;
   const secBadge = document.getElementById('recSecondaryTriageBadge');

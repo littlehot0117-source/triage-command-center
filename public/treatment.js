@@ -19,12 +19,16 @@ const mannequinSelectorMap = {
   '腹部': ['mq-Abdomen'],
   '骨盆': ['mq-Pelvis', 'mq-Pelvis-back'],
   '背部脊椎': ['mq-Back'],
-  '四肢肢體': [
-    'mq-Limbs-Larm', 'mq-Limbs-Rarm', 
-    'mq-Limbs-Lleg', 'mq-Limbs-Rleg',
-    'mq-Limbs-Larm-back', 'mq-Limbs-Rarm-back', 
-    'mq-Limbs-Lleg-back', 'mq-Limbs-Rleg-back'
-  ]
+  '左上臂': ['mq-Larm-upper', 'mq-Larm-upper-back'],
+  '左前臂': ['mq-Larm-fore', 'mq-Larm-fore-back'],
+  '左手': ['mq-Lhand', 'mq-Lhand-back'],
+  '左大腿': ['mq-Lleg-thigh', 'mq-Lleg-thigh-back'],
+  '左小腿': ['mq-Lleg-shin', 'mq-Lleg-shin-back'],
+  '右上臂': ['mq-Rarm-upper', 'mq-Rarm-upper-back'],
+  '右前臂': ['mq-Rarm-fore', 'mq-Rarm-fore-back'],
+  '右手': ['mq-Rhand', 'mq-Rhand-back'],
+  '右大腿': ['mq-Rleg-thigh', 'mq-Rleg-thigh-back'],
+  '右小腿': ['mq-Rleg-shin', 'mq-Rleg-shin-back']
 };
 let selectedTriageLevel = null;
 
@@ -349,7 +353,9 @@ function openAssessmentModal(patientId) {
   document.getElementById('assessNationalId').value = '';
   document.getElementById('assessPhone').value = '';
   document.getElementById('assessNotes').value = '';
-  document.getElementById('assessDob').value = '';
+  document.getElementById('assessDobYear').value = '';
+  document.getElementById('assessDobMonth').value = '';
+  document.getElementById('assessDobDay').value = '';
   document.getElementById('assessAge').value = '';
   
   // GCS slider parsing initialization
@@ -402,6 +408,12 @@ function openAssessmentModal(patientId) {
   // Set default triage color
   setAssessTriage(p.triageLevel);
   
+  // Set default time for medication input
+  const timeNow = new Date();
+  const timeStr = timeNow.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  const medTimeInput = document.getElementById('medTime');
+  if (medTimeInput) medTimeInput.value = timeStr;
+
   // If treatmentInfo already exists, populate it
   if (p.treatmentInfo) {
     const t = p.treatmentInfo;
@@ -410,7 +422,19 @@ function openAssessmentModal(patientId) {
     document.getElementById('assessPhone').value = t.phone || '';
     document.getElementById('assessNotes').value = t.notes || '';
     
-    document.getElementById('assessDob').value = t.dob || '';
+    let yVal = '', mVal = '', dVal = '';
+    if (t.dob) {
+      const dobParts = t.dob.split('-');
+      if (dobParts.length === 3) {
+        yVal = dobParts[0];
+        mVal = parseInt(dobParts[1], 10);
+        dVal = parseInt(dobParts[2], 10);
+      }
+    }
+    document.getElementById('assessDobYear').value = yVal;
+    document.getElementById('assessDobMonth').value = mVal;
+    document.getElementById('assessDobDay').value = dVal;
+    
     document.getElementById('assessAge').value = t.age || '';
     selectAssessGender(t.gender || 'unknown');
     
@@ -432,6 +456,12 @@ function openAssessmentModal(patientId) {
       injuredPartsNotes = { ...t.injuredPartsNotes };
     }
     
+    patientMedications = [];
+    if (t.medications) {
+      patientMedications = [...t.medications];
+    }
+    renderMedicationsTable();
+    
     if (t.updatedTriageLevel) {
       setAssessTriage(t.updatedTriageLevel);
     }
@@ -443,6 +473,9 @@ function openAssessmentModal(patientId) {
     } else if (p.ageGroup === 'adult') {
       document.getElementById('assessAge').value = '30';
     }
+    
+    patientMedications = [];
+    renderMedicationsTable();
   }
   
   // Render toggles & checkbox buttons
@@ -470,25 +503,121 @@ function selectAssessGender(gender) {
   if (target) target.classList.add('active');
 }
 
-function calculateAgeFromDob() {
-  const dobInput = document.getElementById('assessDob');
+function populateDobDropdowns() {
+  const ySel = document.getElementById('assessDobYear');
+  const mSel = document.getElementById('assessDobMonth');
+  const dSel = document.getElementById('assessDobDay');
+  
+  if (!ySel || !mSel || !dSel) return;
+  
+  ySel.innerHTML = '<option value="">年 (西元/民國)</option>';
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y >= 1900; y--) {
+    const minguo = y - 1911;
+    const label = minguo > 0 ? `${y} (民國 ${minguo} 年)` : `${y} (民國前 ${Math.abs(minguo) + 1} 年)`;
+    ySel.innerHTML += `<option value="${y}">${label}</option>`;
+  }
+  
+  mSel.innerHTML = '<option value="">月</option>';
+  for (let m = 1; m <= 12; m++) {
+    mSel.innerHTML += `<option value="${m}">${m}月</option>`;
+  }
+  
+  dSel.innerHTML = '<option value="">日</option>';
+  for (let d = 1; d <= 31; d++) {
+    dSel.innerHTML += `<option value="${d}">${d}日</option>`;
+  }
+}
+
+function calculateAgeFromDobDropdowns() {
+  const y = document.getElementById('assessDobYear').value;
+  const m = document.getElementById('assessDobMonth').value;
+  const d = document.getElementById('assessDobDay').value;
+  
   const ageInput = document.getElementById('assessAge');
-  if (!dobInput || !ageInput) return;
+  if (!ageInput) return;
   
-  const dobVal = dobInput.value;
-  if (!dobVal) return;
+  if (!y || !m || !d) return;
   
-  const dob = new Date(dobVal);
-  if (isNaN(dob.getTime())) return;
-  
+  const dob = new Date(y, m - 1, d);
   const today = new Date();
+  
   let age = today.getFullYear() - dob.getFullYear();
-  const m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
     age--;
   }
   
   ageInput.value = Math.max(0, age);
+}
+
+// Medication administration record methods
+let patientMedications = [];
+
+function addMedicationRecord() {
+  const time = document.getElementById('medTime').value;
+  const name = document.getElementById('medName').value;
+  const route = document.getElementById('medRoute').value;
+  const doseVal = document.getElementById('medDoseVal').value.trim();
+  const doseUnit = document.getElementById('medDoseUnit').value;
+  const remark = document.getElementById('medRemark').value.trim();
+  
+  if (!time) {
+    alert('請指定給藥時間！');
+    return;
+  }
+  if (!doseVal) {
+    alert('請輸入劑量數值！');
+    return;
+  }
+  
+  const record = {
+    time,
+    name,
+    route,
+    dose: `${doseVal} ${doseUnit}`,
+    remark: remark || '-'
+  };
+  
+  patientMedications.push(record);
+  
+  // Clear input
+  document.getElementById('medDoseVal').value = '';
+  document.getElementById('medRemark').value = '';
+  
+  renderMedicationsTable();
+}
+
+function removeMedicationRecord(index) {
+  patientMedications.splice(index, 1);
+  renderMedicationsTable();
+}
+
+function renderMedicationsTable() {
+  const body = document.getElementById('medicationListBody');
+  if (!body) return;
+  
+  if (patientMedications.length === 0) {
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:10px 0;">目前無用藥紀錄</td></tr>`;
+    return;
+  }
+  
+  body.innerHTML = patientMedications.map((m, idx) => `
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+      <td style="padding:6px 2px;">${m.time}</td>
+      <td style="padding:6px 2px; font-weight:700; color:#10b981;">${m.name}</td>
+      <td style="padding:6px 2px;">${m.route}</td>
+      <td style="padding:6px 2px; font-weight:700;">${m.dose}</td>
+      <td style="padding:6px 2px; color:var(--text-muted); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${m.remark}">${m.remark}</td>
+      <td style="padding:6px 2px; text-align:center;">
+        <button type="button" onclick="removeMedicationRecord(${idx})" style="background:none; border:none; color:var(--triage-red); cursor:pointer; padding:2px;">
+          <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+  
+  lucide.createIcons();
 }
 
 // Injured Parts Selection
@@ -679,7 +808,13 @@ function saveAssessment(event) {
   const nationalId = document.getElementById('assessNationalId').value.trim().toUpperCase();
   const phone = document.getElementById('assessPhone').value.trim();
   const gender = document.getElementById('assessGender').value;
-  const dob = document.getElementById('assessDob').value;
+  const y = document.getElementById('assessDobYear').value;
+  const m = document.getElementById('assessDobMonth').value;
+  const d = document.getElementById('assessDobDay').value;
+  let dob = '';
+  if (y && m && d) {
+    dob = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
   const age = document.getElementById('assessAge').value.trim();
   const ageGroup = (age && parseInt(age) < 18) ? 'child' : 'adult';
   
@@ -721,6 +856,7 @@ function saveAssessment(event) {
     ageGroup,
     injuredParts: Array.from(selectedInjuredParts),
     injuredPartsNotes: { ...injuredPartsNotes },
+    medications: [...patientMedications],
     vitals: {
       gcs,
       bpSystolic,
@@ -979,6 +1115,7 @@ function startCountdownTimer() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  populateDobDropdowns();
   initConnection();
   lucide.createIcons();
   startCountdownTimer();
