@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>大傷治療區臨床系統 - MCI Treatment Area</title>
+  <script>
+    // Apply theme immediately to prevent FOUC
+    const savedTheme = localStorage.getItem('triage-theme') || 'dark';
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    }
+  </script>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <!-- Google Fonts: Outfit and Noto Sans TC -->
@@ -28,9 +35,14 @@
           <div id="connectionStatusDot" class="status-dot offline" style="width:8px; height:8px;"></div>
           <span id="connectionStatusText" style="font-size: 10px; color: var(--text-muted);">離線模式</span>
         </div>
-        <a href="officer.html" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px; height: 26px; border-color: var(--border-color); display: flex; align-items: center; gap: 4px; text-decoration: none;">
-          <i data-lucide="arrow-left" style="width:12px; height:12px;"></i> 返回檢傷 App
-        </a>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button id="themeToggleBtn" class="btn btn-secondary" onclick="toggleTheme()" style="padding: 4px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--btn-secondary-bg); cursor: pointer;" title="切換日夜間模式">
+            <i id="themeToggleIcon" data-lucide="sun" style="width: 14px; height: 14px;"></i>
+          </button>
+          <a href="officer.html" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px; height: 26px; border-color: var(--border-color); display: flex; align-items: center; gap: 4px; text-decoration: none;">
+            <i data-lucide="arrow-left" style="width:12px; height:12px;"></i> 返回檢傷 App
+          </a>
+        </div>
       </div>
     </header>
 
@@ -149,33 +161,33 @@
                   .mq-part.active { fill: rgba(239, 68, 68, 0.45); stroke: #ef4444; filter: drop-shadow(0 0 3px rgba(239,68,68,0.5)); }
                 </style>
                 <!-- Head -->
-                <circle id="mq-Head" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部')"></circle>
+                <circle id="mq-Head" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部(前)')" title="頭部(前)"></circle>
                 <!-- Neck -->
-                <rect id="mq-Neck" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部')"></rect>
+                <rect id="mq-Neck" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部(前)')" title="頸部(前)"></rect>
                 <!-- Chest -->
-                <rect id="mq-Chest" class="mq-part" x="33" y="48" width="34" height="26" rx="4" onclick="toggleInjuredPart('胸部')"></rect>
+                <rect id="mq-Chest" class="mq-part" x="33" y="48" width="34" height="26" rx="4" onclick="toggleInjuredPart('胸部')" title="胸部"></rect>
                 <!-- Abdomen -->
-                <rect id="mq-Abdomen" class="mq-part" x="35" y="76" width="30" height="20" rx="2" onclick="toggleInjuredPart('腹部')"></rect>
+                <rect id="mq-Abdomen" class="mq-part" x="35" y="76" width="30" height="20" rx="2" onclick="toggleInjuredPart('腹部')" title="腹部"></rect>
                 <!-- Pelvis -->
-                <polygon id="mq-Pelvis" class="mq-part" points="35,98 65,98 61,114 39,114" onclick="toggleInjuredPart('骨盆')"></polygon>
+                <polygon id="mq-Pelvis" class="mq-part" points="35,98 65,98 61,114 39,114" onclick="toggleInjuredPart('骨盆(前)')" title="骨盆(前)"></polygon>
                 
                 <!-- Left Upper Limb parts -->
-                <rect id="mq-Larm-upper" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂')" title="左上臂"></rect>
-                <rect id="mq-Larm-fore" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂')" title="左前臂"></rect>
-                <circle id="mq-Lhand" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手')" title="左手"></circle>
+                <rect id="mq-Larm-upper" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂(前)')" title="左上臂(前)"></rect>
+                <rect id="mq-Larm-fore" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂(前)')" title="左前臂(前)"></rect>
+                <circle id="mq-Lhand" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手(前)')" title="左手(前)"></circle>
                 
                 <!-- Right Upper Limb parts -->
-                <rect id="mq-Rarm-upper" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂')" title="右上臂"></rect>
-                <rect id="mq-Rarm-fore" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂')" title="右前臂"></rect>
-                <circle id="mq-Rhand" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手')" title="右手"></circle>
+                <rect id="mq-Rarm-upper" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂(前)')" title="右上臂(前)"></rect>
+                <rect id="mq-Rarm-fore" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂(前)')" title="右前臂(前)"></rect>
+                <circle id="mq-Rhand" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手(前)')" title="右手(前)"></circle>
                 
                 <!-- Left Lower Limb parts -->
-                <rect id="mq-Lleg-thigh" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿')" title="左大腿"></rect>
-                <rect id="mq-Lleg-shin" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿')" title="左小腿"></rect>
+                <rect id="mq-Lleg-thigh" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿(前)')" title="左大腿(前)"></rect>
+                <rect id="mq-Lleg-shin" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿(前)')" title="左小腿(前)"></rect>
                 
                 <!-- Right Lower Limb parts -->
-                <rect id="mq-Rleg-thigh" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿')" title="右大腿"></rect>
-                <rect id="mq-Rleg-shin" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿')" title="右小腿"></rect>
+                <rect id="mq-Rleg-thigh" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿(前)')" title="右大腿(前)"></rect>
+                <rect id="mq-Rleg-shin" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿(前)')" title="右小腿(前)"></rect>
               </svg>
             </div>
 
@@ -184,31 +196,31 @@
               <span style="font-size:11px; font-weight:700; color:var(--text-muted);">背面 (Back)</span>
               <svg width="100" height="210" viewBox="0 0 100 210" style="overflow:visible;">
                 <!-- Head (Back) -->
-                <circle id="mq-Head-back" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部')"></circle>
+                <circle id="mq-Head-back" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部(後)')" title="頭部(後)"></circle>
                 <!-- Neck (Back) -->
-                <rect id="mq-Neck-back" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部')"></rect>
+                <rect id="mq-Neck-back" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部(後)')" title="頸部(後)"></rect>
                 <!-- Back/Spine (背部脊椎) -->
-                <rect id="mq-Back" class="mq-part" x="33" y="48" width="34" height="50" rx="4" onclick="toggleInjuredPart('背部脊椎')"></rect>
+                <rect id="mq-Back" class="mq-part" x="33" y="48" width="34" height="50" rx="4" onclick="toggleInjuredPart('背部脊椎')" title="背部脊椎"></rect>
                 <!-- Pelvis/Glute (Back) -->
-                <polygon id="mq-Pelvis-back" class="mq-part" points="35,100 65,100 61,114 39,114" onclick="toggleInjuredPart('骨盆')"></polygon>
+                <polygon id="mq-Pelvis-back" class="mq-part" points="35,100 65,100 61,114 39,114" onclick="toggleInjuredPart('骨盆(後)')" title="骨盆(後)"></polygon>
                 
                 <!-- Left Upper Limb parts (Back) -->
-                <rect id="mq-Larm-upper-back" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂')" title="左上臂"></rect>
-                <rect id="mq-Larm-fore-back" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂')" title="左前臂"></rect>
-                <circle id="mq-Lhand-back" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手')" title="左手"></circle>
+                <rect id="mq-Larm-upper-back" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂(後)')" title="左上臂(後)"></rect>
+                <rect id="mq-Larm-fore-back" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂(後)')" title="左前臂(後)"></rect>
+                <circle id="mq-Lhand-back" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手(後)')" title="左手(後)"></circle>
                 
                 <!-- Right Upper Limb parts (Back) -->
-                <rect id="mq-Rarm-upper-back" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂')" title="右上臂"></rect>
-                <rect id="mq-Rarm-fore-back" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂')" title="右前臂"></rect>
-                <circle id="mq-Rhand-back" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手')" title="右手"></circle>
+                <rect id="mq-Rarm-upper-back" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂(後)')" title="右上臂(後)"></rect>
+                <rect id="mq-Rarm-fore-back" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂(後)')" title="右前臂(後)"></rect>
+                <circle id="mq-Rhand-back" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手(後)')" title="右手(後)"></circle>
                 
                 <!-- Left Lower Limb parts (Back) -->
-                <rect id="mq-Lleg-thigh-back" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿')" title="左大腿"></rect>
-                <rect id="mq-Lleg-shin-back" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿')" title="左小腿"></rect>
+                <rect id="mq-Lleg-thigh-back" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿(後)')" title="左大腿(後)"></rect>
+                <rect id="mq-Lleg-shin-back" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿(後)')" title="左小腿(後)"></rect>
                 
                 <!-- Right Lower Limb parts (Back) -->
-                <rect id="mq-Rleg-thigh-back" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿')" title="右大腿"></rect>
-                <rect id="mq-Rleg-shin-back" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿')" title="右小腿"></rect>
+                <rect id="mq-Rleg-thigh-back" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿(後)')" title="右大腿(後)"></rect>
+                <rect id="mq-Rleg-shin-back" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿(後)')" title="右小腿(後)"></rect>
               </svg>
             </div>
           </div>
@@ -432,5 +444,27 @@
   </div>
 
   <script src="treatment.js"></script>
+  <script>
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light-theme');
+      const theme = isLight ? 'light' : 'dark';
+      localStorage.setItem('triage-theme', theme);
+      
+      const icon = document.getElementById('themeToggleIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
+        lucide.createIcons();
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLight = document.documentElement.classList.contains('light-theme');
+      const icon = document.getElementById('themeToggleIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
+        lucide.createIcons();
+      }
+    });
+  </script>
 </body>
 </html>

@@ -712,8 +712,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('manualAddBtn').addEventListener('click', () => {
     const level = document.getElementById('manualTriageLevel').value;
     const desc = document.getElementById('manualDescription').value.trim();
-    const gender = document.getElementById('manualGender').value;
-    const ageGroup = document.getElementById('manualAge').value;
+    const gender = 'unknown';
+    const ageGroup = 'adult';
     const location = document.getElementById('manualLocation').value.trim() || '現場';
 
     // Generate patient ID

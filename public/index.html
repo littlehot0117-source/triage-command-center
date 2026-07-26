@@ -6,6 +6,12 @@
   <title>大傷監測指揮儀表板 - Real-time Command Center</title>
   
   <script>
+    // Apply theme immediately to prevent FOUC
+    const savedTheme = localStorage.getItem('triage-theme') || 'dark';
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    }
+
     // Detect mobile device and automatically redirect to mobile officer app
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && 
         !window.location.search.includes('desktop=true')) {
@@ -46,7 +52,10 @@
       <h1 id="headerCaseName">大傷監測指揮儀表板</h1>
       <span class="badge-live">LIVE 監測中</span>
     </div>
-    <div style="display: flex; gap: 16px; align-items: center;">
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <button id="themeToggleBtn" class="btn btn-secondary" onclick="toggleTheme()" style="padding: 10px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--btn-secondary-bg); cursor: pointer;" title="切換日夜間模式">
+        <i id="themeToggleIcon" data-lucide="sun" style="width: 20px; height: 20px;"></i>
+      </button>
       <button id="endCaseBtn" class="btn btn-secondary btn-danger">
         <i data-lucide="power"></i> 結案並清除資料
       </button>
@@ -195,40 +204,23 @@
         <!-- Manual Add Patient Panel -->
         <div class="glass-card">
           <h3 class="section-title"><i data-lucide="user-plus"></i> 手動新增檢傷傷患</h3>
-          <div class="config-grid" style="margin-top: 0;">
-            <div class="form-group">
+          <div class="config-grid" style="margin-top: 0; grid-template-columns: 1fr 1.5fr 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom:0;">
               <label for="manualTriageLevel">檢傷等級</label>
-              <select id="manualTriageLevel" class="input-control">
+              <select id="manualTriageLevel" class="input-control" style="height:38px;">
                 <option value="red" style="color: var(--triage-red);">🔴 立即治療 (Immediate)</option>
                 <option value="yellow" style="color: var(--triage-yellow);">🟡 延遲治療 (Delayed)</option>
                 <option value="green" style="color: var(--triage-green);">🟢 輕傷 (Minor)</option>
                 <option value="black" style="color: var(--triage-black);">⚫ 死亡/期待治療 (Deceased)</option>
               </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:0;">
               <label for="manualDescription">傷患特徵備註</label>
-              <input type="text" id="manualDescription" class="input-control" placeholder="如：頭部出血、男性約30歲">
+              <input type="text" id="manualDescription" class="input-control" placeholder="如：頭部出血、男性約30歲" style="height:38px;">
             </div>
-          </div>
-          <div class="config-grid" style="margin-top: 0; grid-template-columns: 1fr 1fr 1fr;">
-            <div class="form-group">
-              <label for="manualGender">性別</label>
-              <select id="manualGender" class="input-control">
-                <option value="unknown">未知</option>
-                <option value="male">男性</option>
-                <option value="female">女性</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="manualAge">年齡層</label>
-              <select id="manualAge" class="input-control">
-                <option value="adult">成人</option>
-                <option value="child">孩童</option>
-              </select>
-            </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:0;">
               <label for="manualLocation">現場位置</label>
-              <input type="text" id="manualLocation" class="input-control" placeholder="現場 A 區" value="現場">
+              <input type="text" id="manualLocation" class="input-control" placeholder="現場 A 區" value="現場" style="height:38px;">
             </div>
           </div>
           <button id="manualAddBtn" class="btn" style="width: 100%;">
@@ -512,5 +504,27 @@
   </div>
 
   <script src="dashboard.js"></script>
+  <script>
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light-theme');
+      const theme = isLight ? 'light' : 'dark';
+      localStorage.setItem('triage-theme', theme);
+      
+      const icon = document.getElementById('themeToggleIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
+        lucide.createIcons();
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLight = document.documentElement.classList.contains('light-theme');
+      const icon = document.getElementById('themeToggleIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
+        lucide.createIcons();
+      }
+    });
+  </script>
 </body>
 </html>

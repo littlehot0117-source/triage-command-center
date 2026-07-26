@@ -13,22 +13,35 @@ let selectedInjuredParts = new Set();
 let injuredPartsNotes = {};
 
 const mannequinSelectorMap = {
-  '頭部': ['mq-Head', 'mq-Head-back'],
-  '頸部': ['mq-Neck', 'mq-Neck-back'],
+  '頭部(前)': ['mq-Head'],
+  '頭部(後)': ['mq-Head-back'],
+  '頸部(前)': ['mq-Neck'],
+  '頸部(後)': ['mq-Neck-back'],
   '胸部': ['mq-Chest'],
   '腹部': ['mq-Abdomen'],
-  '骨盆': ['mq-Pelvis', 'mq-Pelvis-back'],
+  '骨盆(前)': ['mq-Pelvis'],
+  '骨盆(後)': ['mq-Pelvis-back'],
   '背部脊椎': ['mq-Back'],
-  '左上臂': ['mq-Larm-upper', 'mq-Larm-upper-back'],
-  '左前臂': ['mq-Larm-fore', 'mq-Larm-fore-back'],
-  '左手': ['mq-Lhand', 'mq-Lhand-back'],
-  '左大腿': ['mq-Lleg-thigh', 'mq-Lleg-thigh-back'],
-  '左小腿': ['mq-Lleg-shin', 'mq-Lleg-shin-back'],
-  '右上臂': ['mq-Rarm-upper', 'mq-Rarm-upper-back'],
-  '右前臂': ['mq-Rarm-fore', 'mq-Rarm-fore-back'],
-  '右手': ['mq-Rhand', 'mq-Rhand-back'],
-  '右大腿': ['mq-Rleg-thigh', 'mq-Rleg-thigh-back'],
-  '右小腿': ['mq-Rleg-shin', 'mq-Rleg-shin-back']
+  '左上臂(前)': ['mq-Larm-upper'],
+  '左上臂(後)': ['mq-Larm-upper-back'],
+  '左前臂(前)': ['mq-Larm-fore'],
+  '左前臂(後)': ['mq-Larm-fore-back'],
+  '左手(前)': ['mq-Lhand'],
+  '左手(後)': ['mq-Lhand-back'],
+  '左大腿(前)': ['mq-Lleg-thigh'],
+  '左大腿(後)': ['mq-Lleg-thigh-back'],
+  '左小腿(前)': ['mq-Lleg-shin'],
+  '左小腿(後)': ['mq-Lleg-shin-back'],
+  '右上臂(前)': ['mq-Rarm-upper'],
+  '右上臂(後)': ['mq-Rarm-upper-back'],
+  '右前臂(前)': ['mq-Rarm-fore'],
+  '右前臂(後)': ['mq-Rarm-fore-back'],
+  '右手(前)': ['mq-Rhand'],
+  '右手(後)': ['mq-Rhand-back'],
+  '右大腿(前)': ['mq-Rleg-thigh'],
+  '右大腿(後)': ['mq-Rleg-thigh-back'],
+  '右小腿(前)': ['mq-Rleg-shin'],
+  '右小腿(後)': ['mq-Rleg-shin-back']
 };
 let selectedTriageLevel = null;
 

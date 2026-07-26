@@ -16,6 +16,53 @@
   --accent: #8b5cf6;
   --accent-gradient: linear-gradient(135deg, #8b5cf6, #6d28d9);
   
+  /* Theme elements adjustments */
+  --input-bg: rgba(0, 0, 0, 0.3);
+  --modal-bg: #111827;
+  --th-bg: #111928;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+  --btn-secondary-color: var(--text-muted);
+  --bg-grad-1: rgba(29, 78, 216, 0.15);
+  --bg-grad-2: rgba(139, 92, 246, 0.15);
+  --item-bg: rgba(255, 255, 255, 0.02);
+  --gcs-slider-track: rgba(255, 255, 255, 0.1);
+  --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --card-hover-border: rgba(255, 255, 255, 0.15);
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --card-hover-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+}
+
+.light-theme {
+  /* Day Mode Theme Override */
+  --bg-dark: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-focus: rgba(37, 99, 235, 0.5);
+  
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  
+  --primary: #2563eb;
+  --primary-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
+  --accent: #7c3aed;
+  --accent-gradient: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  
+  --input-bg: rgba(255, 255, 255, 0.95);
+  --modal-bg: #ffffff;
+  --th-bg: #e2e8f0;
+  --btn-secondary-bg: rgba(0, 0, 0, 0.04);
+  --btn-secondary-color: #475569;
+  --bg-grad-1: rgba(59, 130, 246, 0.06);
+  --bg-grad-2: rgba(139, 92, 246, 0.06);
+  --item-bg: rgba(0, 0, 0, 0.02);
+  --gcs-slider-track: rgba(0, 0, 0, 0.08);
+  --text-shadow: none;
+  --card-hover-border: rgba(0, 0, 0, 0.18);
+  --card-shadow: 0 8px 24px 0 rgba(148, 163, 184, 0.15);
+  --card-hover-shadow: 0 12px 32px 0 rgba(148, 163, 184, 0.25);
+}
+  
   /* Triage Colors */
   --triage-red: #f43f5e;
   --triage-red-gradient: linear-gradient(135deg, #f43f5e, #be123c);
@@ -98,14 +145,14 @@ h1, h2, h3, h4, h5 {
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  box-shadow: var(--box-shadow);
+  box-shadow: var(--card-shadow);
   padding: 24px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+  border-color: var(--card-hover-border);
+  box-shadow: var(--card-hover-shadow);
 }
 
 /* Header */
@@ -177,14 +224,15 @@ header {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-main);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-color);
   border: 1px solid var(--border-color);
   box-shadow: none;
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--btn-secondary-bg);
+  filter: brightness(1.15);
   box-shadow: none;
 }
 
@@ -212,7 +260,7 @@ header {
 
 .input-control {
   width: 100%;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--input-bg);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 12px 16px;
@@ -469,7 +517,7 @@ header {
 
 /* Patient Tables */
 .table-container {
-  overflow-x: auto;
+  overflow: auto;
   max-height: 450px;
 }
 
@@ -486,9 +534,13 @@ th, td {
 }
 
 th {
+  position: sticky;
+  top: 0;
   color: var(--text-muted);
   font-weight: 600;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--th-bg);
+  z-index: 10;
+  box-shadow: inset 0 -1px 0 var(--border-color);
 }
 
 tr:hover td {
@@ -590,10 +642,10 @@ tr:hover td {
 .modal-content {
   width: 90%;
   max-width: 500px;
-  background: #0f172a;
+  background: var(--modal-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  box-shadow: var(--box-shadow);
+  box-shadow: var(--card-shadow);
   padding: 24px;
   transform: translateY(-20px);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
