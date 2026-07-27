@@ -115,11 +115,41 @@
 
     </div>
 
-    <!-- Main Grid layout -->
-    <div class="dashboard-grid">
-      <!-- Left Column: Visual Charts & Vehicles/Hospitals -->
-      <div style="display: flex; flex-direction: column; gap: 30px;">
-        <!-- Vehicle Movements -->
+    <!-- Main Dashboard Layout (Vertically Stacked with Dynamic Widths) -->
+    <div style="display: flex; flex-direction: column; gap: 30px; margin-bottom: 30px;">
+      
+      <!-- 1. Patient List (傷患名單即時看板) - Spans Full Width -->
+      <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
+          <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;"><i data-lucide="list-todo"></i> 傷患名單即時看板</h3>
+          <span id="waitingCount" class="badge-count">0</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>傷患 ID</th>
+                <th>檢傷等級</th>
+                <th>特徵/性別/年齡</th>
+                <th>地點</th>
+                <th>臨床病歷</th>
+                <th>時間</th>
+                <th>調度送醫</th>
+              </tr>
+            </thead>
+            <tbody id="waitingPatientTableBody">
+              <!-- Dynamic Rows -->
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. Vehicles List & Transported Patients List - Side-by-Side (50% / 50%) -->
+      <div class="dashboard-grid" style="margin-bottom: 0;">
+        <!-- Left: Vehicle Movements -->
         <div class="glass-card">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
             <h3 style="font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="truck"></i> 車輛動向及狀態管理</h3>
@@ -132,49 +162,7 @@
           </div>
         </div>
 
-        <!-- Hospital Capacity -->
-        <div class="glass-card">
-          <h3 class="section-title"><i data-lucide="building-2"></i> 醫院收容容納能力監控</h3>
-          <div id="hospitalList" class="hospital-grid">
-            <!-- Dynamic Hospitals -->
-          </div>
-        </div>
-
-
-      </div>
-
-      <!-- Right Column: Patient List and Sent-to-Hospital List -->
-      <div style="display: flex; flex-direction: column; gap: 30px;">
-        <!-- Scene Patients Board -->
-        <div class="glass-card" style="flex: 1;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;"><i data-lucide="list-todo"></i> 傷患名單即時看板</h3>
-            <span id="waitingCount" class="badge-count">0</span>
-          </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>傷患 ID</th>
-                  <th>檢傷等級</th>
-                  <th>特徵/性別/年齡</th>
-                  <th>地點</th>
-                  <th>臨床病歷</th>
-                  <th>時間</th>
-                  <th>調度送醫</th>
-                </tr>
-              </thead>
-              <tbody id="waitingPatientTableBody">
-                <!-- Dynamic Rows -->
-                <tr>
-                  <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Sent-to-Hospital Patients Board -->
+        <!-- Right: Sent-to-Hospital Patients Board -->
         <div class="glass-card">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
             <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;"><i data-lucide="check-circle-2"></i> 已送醫患者看板</h3>
@@ -200,34 +188,16 @@
             </table>
           </div>
         </div>
+      </div>
 
-        <!-- Manual Add Patient Panel -->
-        <div class="glass-card">
-          <h3 class="section-title"><i data-lucide="user-plus"></i> 手動新增檢傷傷患</h3>
-          <div class="config-grid" style="margin-top: 0; grid-template-columns: 1fr 1.5fr 1fr; gap: 12px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="manualTriageLevel">檢傷等級</label>
-              <select id="manualTriageLevel" class="input-control" style="height:38px;">
-                <option value="red" style="color: var(--triage-red);">🔴 立即治療 (Immediate)</option>
-                <option value="yellow" style="color: var(--triage-yellow);">🟡 延遲治療 (Delayed)</option>
-                <option value="green" style="color: var(--triage-green);">🟢 輕傷 (Minor)</option>
-                <option value="black" style="color: var(--triage-black);">⚫ 死亡/期待治療 (Deceased)</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="manualDescription">傷患特徵備註</label>
-              <input type="text" id="manualDescription" class="input-control" placeholder="如：頭部出血、男性約30歲" style="height:38px;">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="manualLocation">現場位置</label>
-              <input type="text" id="manualLocation" class="input-control" placeholder="現場 A 區" value="現場" style="height:38px;">
-            </div>
-          </div>
-          <button id="manualAddBtn" class="btn" style="width: 100%;">
-            <i data-lucide="plus"></i> 登記傷患
-          </button>
+      <!-- 3. Hospital Capacity (醫院收容容納能力監控) - Spans Full Width -->
+      <div class="glass-card">
+        <h3 class="section-title"><i data-lucide="building-2"></i> 醫院收容容納能力監控</h3>
+        <div id="hospitalList" class="hospital-grid">
+          <!-- Dynamic Hospitals -->
         </div>
       </div>
+
     </div>
 
     <!-- Parameter Config & Management -->

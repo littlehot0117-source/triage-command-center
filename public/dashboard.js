@@ -708,29 +708,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  //手動登記傷患按鈕
-  document.getElementById('manualAddBtn').addEventListener('click', () => {
-    const level = document.getElementById('manualTriageLevel').value;
-    const desc = document.getElementById('manualDescription').value.trim();
-    const gender = 'unknown';
-    const ageGroup = 'adult';
-    const location = document.getElementById('manualLocation').value.trim() || '現場';
+  //手動登記傷患按鈕 (若功能已被刪除則跳過監聽)
+  const manualAddBtn = document.getElementById('manualAddBtn');
+  if (manualAddBtn) {
+    manualAddBtn.addEventListener('click', () => {
+      const level = document.getElementById('manualTriageLevel').value;
+      const desc = document.getElementById('manualDescription').value.trim();
+      const gender = 'unknown';
+      const ageGroup = 'adult';
+      const location = document.getElementById('manualLocation').value.trim() || '現場';
 
-    // Generate patient ID
-    const randomId = 'M-' + Math.floor(100 + Math.random() * 900);
+      // Generate patient ID
+      const randomId = 'M-' + Math.floor(100 + Math.random() * 900);
 
-    sendAction('ADD_PATIENT', {
-      id: randomId,
-      triageLevel: level,
-      gender,
-      ageGroup,
-      description: desc,
-      location
+      sendAction('ADD_PATIENT', {
+        id: randomId,
+        triageLevel: level,
+        gender,
+        ageGroup,
+        description: desc,
+        location
+      });
+
+      // Clear inputs
+      document.getElementById('manualDescription').value = '';
     });
-
-    // Clear inputs
-    document.getElementById('manualDescription').value = '';
-  });
+  }
 
   // Modal Cancel
   document.getElementById('modalCancelBtn').addEventListener('click', closeTransportModal);
