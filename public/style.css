@@ -34,38 +34,7 @@
   --mannequin-stroke: rgba(255, 255, 255, 0.35);
 }
 
-.light-theme {
-  /* Day Mode Theme Override */
-  --bg-dark: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: rgba(255, 255, 255, 0.95);
-  --border-color: rgba(0, 0, 0, 0.1);
-  --border-focus: rgba(37, 99, 235, 0.5);
-  
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  
-  --primary: #2563eb;
-  --primary-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
-  --accent: #7c3aed;
-  --accent-gradient: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  
-  --input-bg: rgba(255, 255, 255, 0.95);
-  --modal-bg: #ffffff;
-  --th-bg: #e2e8f0;
-  --btn-secondary-bg: rgba(0, 0, 0, 0.04);
-  --btn-secondary-color: #475569;
-  --bg-grad-1: rgba(59, 130, 246, 0.06);
-  --bg-grad-2: rgba(139, 92, 246, 0.06);
-  --item-bg: rgba(0, 0, 0, 0.02);
-  --gcs-slider-track: rgba(0, 0, 0, 0.08);
-  --text-shadow: none;
-  --card-hover-border: rgba(0, 0, 0, 0.18);
-  --card-shadow: 0 8px 24px 0 rgba(148, 163, 184, 0.15);
-  --card-hover-shadow: 0 12px 32px 0 rgba(148, 163, 184, 0.25);
-  --mannequin-fill: rgba(0, 0, 0, 0.04);
-  --mannequin-stroke: rgba(0, 0, 0, 0.25);
-}
+
   
   /* Triage Colors */
   --triage-red: #f43f5e;

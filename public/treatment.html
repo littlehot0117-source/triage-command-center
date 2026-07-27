@@ -4,13 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>大傷治療區臨床系統 - MCI Treatment Area</title>
-  <script>
-    // Apply theme immediately to prevent FOUC
-    const savedTheme = localStorage.getItem('triage-theme') || 'dark';
-    if (savedTheme === 'light') {
-      document.documentElement.classList.add('light-theme');
-    }
-  </script>
+
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <!-- Google Fonts: Outfit and Noto Sans TC -->
@@ -35,14 +29,9 @@
           <div id="connectionStatusDot" class="status-dot offline" style="width:8px; height:8px;"></div>
           <span id="connectionStatusText" style="font-size: 10px; color: var(--text-muted);">離線模式</span>
         </div>
-        <div style="display: flex; gap: 6px; align-items: center;">
-          <button id="themeToggleBtn" class="btn btn-secondary" onclick="toggleTheme()" style="padding: 4px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--btn-secondary-bg); cursor: pointer;" title="切換日夜間模式">
-            <i id="themeToggleIcon" data-lucide="sun" style="width: 14px; height: 14px;"></i>
-          </button>
           <a href="officer.html" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px; height: 26px; border-color: var(--border-color); display: flex; align-items: center; gap: 4px; text-decoration: none;">
             <i data-lucide="arrow-left" style="width:12px; height:12px;"></i> 返回檢傷 App
           </a>
-        </div>
       </div>
     </header>
 
@@ -444,27 +433,5 @@
   </div>
 
   <script src="treatment.js"></script>
-  <script>
-    function toggleTheme() {
-      const isLight = document.documentElement.classList.toggle('light-theme');
-      const theme = isLight ? 'light' : 'dark';
-      localStorage.setItem('triage-theme', theme);
-      
-      const icon = document.getElementById('themeToggleIcon');
-      if (icon) {
-        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-        lucide.createIcons();
-      }
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      const isLight = document.documentElement.classList.contains('light-theme');
-      const icon = document.getElementById('themeToggleIcon');
-      if (icon) {
-        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-        lucide.createIcons();
-      }
-    });
-  </script>
 </body>
 </html>

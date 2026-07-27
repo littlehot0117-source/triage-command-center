@@ -6,12 +6,6 @@
   <title>大傷監測指揮儀表板 - Real-time Command Center</title>
   
   <script>
-    // Apply theme immediately to prevent FOUC
-    const savedTheme = localStorage.getItem('triage-theme') || 'dark';
-    if (savedTheme === 'light') {
-      document.documentElement.classList.add('light-theme');
-    }
-
     // Detect mobile device and automatically redirect to mobile officer app
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && 
         !window.location.search.includes('desktop=true')) {
@@ -53,11 +47,11 @@
       <span class="badge-live">LIVE 監測中</span>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <button id="themeToggleBtn" class="btn btn-secondary" onclick="toggleTheme()" style="padding: 10px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--btn-secondary-bg); cursor: pointer;" title="切換日夜間模式">
-        <i id="themeToggleIcon" data-lucide="sun" style="width: 20px; height: 20px;"></i>
-      </button>
-      <button id="endCaseBtn" class="btn btn-secondary btn-danger">
-        <i data-lucide="power"></i> 結案並清除資料
+      <a href="treatment.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px;">
+        <i data-lucide="activity" style="width: 16px; height: 16px;"></i> 進入治療區系統
+      </a>
+      <button id="endCaseBtn" class="btn btn-secondary btn-danger" style="height: 38px; font-size: 13.5px; padding: 0 14px;">
+        <i data-lucide="power" style="width: 16px; height: 16px;"></i> 結案並清除資料
       </button>
     </div>
   </header>
@@ -464,27 +458,5 @@
   </div>
 
   <script src="dashboard.js"></script>
-  <script>
-    function toggleTheme() {
-      const isLight = document.documentElement.classList.toggle('light-theme');
-      const theme = isLight ? 'light' : 'dark';
-      localStorage.setItem('triage-theme', theme);
-      
-      const icon = document.getElementById('themeToggleIcon');
-      if (icon) {
-        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-        lucide.createIcons();
-      }
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      const isLight = document.documentElement.classList.contains('light-theme');
-      const icon = document.getElementById('themeToggleIcon');
-      if (icon) {
-        icon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-        lucide.createIcons();
-      }
-    });
-  </script>
 </body>
 </html>
