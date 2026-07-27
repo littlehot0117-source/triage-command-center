@@ -353,24 +353,29 @@ function renderState() {
     `;
   }).join('');
 
-  // 7. Render Hospital Capacities
+  // 7. Render Hospital Capacities (4 columns grid layout with inline upper-limit management)
   const hospitalList = document.getElementById('hospitalList');
-  hospitalList.innerHTML = hospitals.map(h => {
+  hospitalList.innerHTML = hospitals.map((h, i) => {
     const percent = Math.min(100, Math.round((h.receivedCount / h.capacity) * 100));
     let color = 'var(--triage-green)';
     if (percent >= 90) color = 'var(--triage-red)';
     else if (percent >= 60) color = 'var(--triage-yellow)';
 
     return `
-      <div class="item-row hospital-card" style="flex-direction:column; align-items:stretch; gap:8px; cursor:pointer;" onclick="openHospitalPatientsModal('${h.name}')">
-        <div style="display:flex; flex-direction:column; gap:4px;">
-          <div style="font-weight:600; display:flex; align-items:center; gap:6px; font-size:14.5px;">
+      <div class="item-row hospital-card" style="flex-direction:column; align-items:stretch; gap:6px; cursor:pointer;" onclick="openHospitalPatientsModal('${h.name}')">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:600; display:flex; align-items:center; gap:6px; font-size:14px;">
             <i data-lucide="building" style="color:var(--primary); width:16px;height:16px;"></i>
             ${h.name}
           </div>
-          <div style="font-size:12.5px; font-weight:600; color:var(--text-muted); padding-left:22px;">
-            已收容 ${h.receivedCount} / 限額 ${h.capacity} 人 (${percent}%)
+          <div style="display:flex; align-items:center; gap:4px;" onclick="event.stopPropagation();">
+            <span style="font-size:11px; color:var(--text-muted);">限額:</span>
+            <input type="number" class="input-control" style="width:58px; height:24px; padding:2px 4px; font-size:12.5px; text-align:center; border-radius:4px; border:1px solid var(--border-color);" value="${h.capacity}" onchange="changeHospitalCapacity(${i}, this.value)" min="0" max="999">
           </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:600; color:var(--text-muted); padding-left:2px;">
+          <span>已收容 ${h.receivedCount} 人</span>
+          <span>${percent}%</span>
         </div>
         <div class="hospital-capacity-bar" style="margin-top:2px;">
           <div class="hospital-capacity-fill" style="width: ${percent}%; background: ${color};"></div>
@@ -378,9 +383,6 @@ function renderState() {
       </div>
     `;
   }).join('');
-
-  // 8. Render Parameter setup forms
-  renderConfigLists();
 
   // Update the dispatch modal UI in real-time if it's currently open
   const modal = document.getElementById('dispatchModal');
@@ -408,18 +410,7 @@ function getTriageZh(level) {
 }
 
 // Render Configuration Administration Pane
-function renderConfigLists() {
-  // Hospital Capacities Setups
-  const hospitalConfig = document.getElementById('hospitalConfigList');
-  if (hospitalConfig) {
-    hospitalConfig.innerHTML = state.hospitals.map((h, i) => `
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="flex:1; font-size:14px;">${h.name}</span>
-        <input type="number" class="input-control" style="width:80px; padding:6px 10px;" value="${h.capacity}" onchange="changeHospitalCapacity(${i}, this.value)">
-      </div>
-    `).join('');
-  }
-}
+
 
 // Vehicle dispatch modal controls
 function openDispatchModal() {
