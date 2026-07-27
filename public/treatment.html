@@ -122,9 +122,9 @@
             <div class="form-group" style="margin-bottom:0;">
               <label>出生年月日</label>
               <div style="display:flex; gap:4px;">
-                <select id="assessDobYear" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:2.2; font-size:11px; height:38px; padding:2px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius: 4px;"></select>
-                <select id="assessDobMonth" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius: 4px;"></select>
-                <select id="assessDobDay" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobYear" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:2.2; font-size:11px; height:38px; padding:2px; border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobMonth" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobDay" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; border:1px solid var(--border-color); border-radius: 4px;"></select>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:0;">
@@ -156,7 +156,7 @@
               <span style="font-size:11px; font-weight:700; color:var(--text-muted);">正面 (Front)</span>
               <svg width="100" height="210" viewBox="0 0 100 210" style="overflow:visible;">
                 <style>
-                  .mq-part { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.3); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+                  .mq-part { fill: var(--mannequin-fill); stroke: var(--mannequin-stroke); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
                   .mq-part:hover { fill: rgba(16, 185, 129, 0.25); stroke: #10b981; }
                   .mq-part.active { fill: rgba(239, 68, 68, 0.45); stroke: #ef4444; filter: drop-shadow(0 0 3px rgba(239,68,68,0.5)); }
                 </style>
@@ -357,7 +357,7 @@
               </div>
               <div class="form-group" style="margin-bottom:0;">
                 <label style="font-size:11px; margin-bottom:4px; display:block;">藥物名稱</label>
-                <select id="medName" class="input-control" style="font-size:12px; height:32px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                <select id="medName" class="input-control" style="font-size:12px; height:32px; border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
                   <option value="Amiodarone">Amiodarone</option>
                   <option value="D10W">D10W</option>
                   <option value="D50W">D50W</option>
@@ -373,7 +373,7 @@
             <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:8px; margin-bottom:8px;">
               <div class="form-group" style="margin-bottom:0;">
                 <label style="font-size:11px; margin-bottom:4px; display:block;">給藥途徑</label>
-                <select id="medRoute" class="input-control" style="font-size:12px; height:32px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                <select id="medRoute" class="input-control" style="font-size:12px; height:32px; border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
                   <option value="IV">IV</option>
                   <option value="IO">IO</option>
                   <option value="口服">口服</option>
@@ -384,7 +384,7 @@
                 <label style="font-size:11px; margin-bottom:4px; display:block;">藥物劑量</label>
                 <div style="display:flex; gap:4px;">
                   <input type="number" id="medDoseVal" class="input-control" placeholder="劑量" style="flex:1; font-size:12px; height:32px; padding: 4px;">
-                  <select id="medDoseUnit" class="input-control" style="width:65px; font-size:12px; height:32px; color:white; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                  <select id="medDoseUnit" class="input-control" style="width:65px; font-size:12px; height:32px; border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
                     <option value="mg">mg</option>
                     <option value="ml">ml</option>
                   </select>
@@ -430,7 +430,7 @@
                 <i data-lucide="clock" style="width:12px; height:12px;"></i> 插入時間戳記
               </button>
             </div>
-            <textarea id="assessNotes" class="input-control" placeholder="請描述主要傷勢、已進行的緊急醫療處置 (如：給氧、包紮止血、靜脈注射) 或用藥紀錄..." style="height: 80px; resize: none; background: rgba(0, 0, 0, 0.3); color: white; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); width:100%; outline:none; font-family:var(--font-body);"></textarea>
+            <textarea id="assessNotes" class="input-control" placeholder="請描述主要傷勢、已進行的緊急醫療處置 (如：給氧、包紮止血、靜脈注射) 或用藥紀錄..." style="height: 80px; resize: none; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); width:100%; outline:none; font-family:var(--font-body);"></textarea>
           </div>
 
           <!-- Actions -->
