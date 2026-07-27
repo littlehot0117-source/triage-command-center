@@ -32,7 +32,6 @@
   --card-hover-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
   --mannequin-fill: rgba(255, 255, 255, 0.06);
   --mannequin-stroke: rgba(255, 255, 255, 0.35);
-}
 
 
   
@@ -376,10 +375,41 @@ header {
   padding: 18px 20px;
 }
 
-.stat-card.red { border-left-color: var(--triage-red); }
-.stat-card.yellow { border-left-color: var(--triage-yellow); }
-.stat-card.green { border-left-color: var(--triage-green); }
-.stat-card.black { border-left-color: var(--triage-black); }
+.stat-card.red { 
+  background: var(--triage-red-gradient) !important;
+  border-left-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+.stat-card.red h3, .stat-card.red .stat-value, .stat-card.red i, .stat-card.red svg {
+  color: #ffffff !important;
+}
+
+.stat-card.yellow { 
+  background: var(--triage-yellow-gradient) !important;
+  border-left-color: rgba(0, 0, 0, 0.3);
+  color: #000000;
+}
+.stat-card.yellow h3, .stat-card.yellow .stat-value, .stat-card.yellow i, .stat-card.yellow svg {
+  color: #000000 !important;
+}
+
+.stat-card.green { 
+  background: var(--triage-green-gradient) !important;
+  border-left-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+.stat-card.green h3, .stat-card.green .stat-value, .stat-card.green i, .stat-card.green svg {
+  color: #ffffff !important;
+}
+
+.stat-card.black { 
+  background: var(--triage-black-gradient) !important;
+  border-left-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+.stat-card.black h3, .stat-card.black .stat-value, .stat-card.black i, .stat-card.black svg {
+  color: #ffffff !important;
+}
 .stat-card.total { 
   border-left-color: var(--primary); 
   grid-row: span 2;

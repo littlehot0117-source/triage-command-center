@@ -565,23 +565,53 @@ function updateHospitalPatientsModalData(hospitalName) {
   if (hospitalPatients.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px 0;">
+        <td colspan="7" style="text-align:center; color:var(--text-muted); padding:30px 0;">
           目前尚無送往該院的傷患紀錄。
         </td>
       </tr>
     `;
   } else {
     tbody.innerHTML = hospitalPatients.map(p => {
-      const ageGroupZh = p.ageGroup === 'child' ? '孩童' : '成人';
-      const genderZh = p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未知';
+      // Basic info formatting (incorporating treatment info if available)
+      let basicInfoHtml = '';
+      if (p.treatmentInfo) {
+        const genderLabel = p.treatmentInfo.gender === 'male' ? '男' : p.treatmentInfo.gender === 'female' ? '女' : p.treatmentInfo.gender === 'other' ? '其他' : '未知';
+        const namePart = p.treatmentInfo.name ? `<strong>${p.treatmentInfo.name}</strong><br>` : '';
+        const agePart = p.treatmentInfo.age ? `${p.treatmentInfo.age} 歲` : (p.treatmentInfo.ageGroup === 'child' ? '孩童' : '成人');
+        basicInfoHtml = `${namePart}${genderLabel} | ${agePart}`;
+      } else {
+        const genderLabel = p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未知';
+        const ageGroupLabel = p.ageGroup === 'child' ? '孩童' : '成人';
+        basicInfoHtml = `${genderLabel} | ${ageGroupLabel}`;
+      }
+
+      // Treatment Area Info formatting
+      let treatmentInfoHtml = '';
+      if (p.treatmentInfo) {
+        const vitals = p.treatmentInfo.vitals || {};
+        const hasVitals = vitals.gcs || vitals.bpSystolic || vitals.hr || vitals.spo2;
+        const vitalsText = hasVitals ? `<span style="font-size:11.5px; display:inline-block; margin-bottom:2px;">🩺 GCS ${vitals.gcs || '-'}; BP ${vitals.bpSystolic || '-'}/${vitals.bpDiastolic || '-'}; HR ${vitals.hr || '-'} bpm; SpO2 ${vitals.spo2 || '-'}%</span>` : '';
+        
+        const meds = p.treatmentInfo.medications || [];
+        const medsText = meds.length > 0 ? `<span style="font-size:11.5px; display:inline-block; margin-bottom:2px; color:#10b981; font-weight:600;">💊 給藥: ${meds.map(m => m.name).join(', ')}</span>` : '';
+        
+        const notesText = p.treatmentInfo.notes ? `<span style="font-size:11.5px; display:inline-block; white-space:pre-wrap;">📝 備註: ${p.treatmentInfo.notes}</span>` : '';
+        
+        treatmentInfoHtml = [vitalsText, medsText, notesText].filter(t => t).join('<br>');
+      }
+      if (!treatmentInfoHtml) {
+        treatmentInfoHtml = '<span style="color:var(--text-muted); font-size:12px;">無治療評估紀錄</span>';
+      }
+
       return `
         <tr class="patient-row-${p.triageLevel}">
           <td><strong>${p.id}</strong></td>
           <td><span class="triage-badge ${p.triageLevel}">${getTriageZh(p.triageLevel)}</span></td>
-          <td>${genderZh} | ${ageGroupZh}</td>
+          <td>${basicInfoHtml}</td>
           <td>${formatLocation(p.location)}</td>
           <td>${p.transportInfo.time}</td>
           <td>${p.description || '<span style="color:var(--text-muted)">無備註</span>'}</td>
+          <td style="font-size: 12px; line-height: 1.4; max-width: 250px;">${treatmentInfoHtml}</td>
         </tr>
       `;
     }).join('');
