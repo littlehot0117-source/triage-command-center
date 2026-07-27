@@ -364,11 +364,14 @@ function renderState() {
     return `
       <div class="item-row hospital-card" style="flex-direction:column; align-items:stretch; gap:6px; cursor:pointer;" onclick="openHospitalPatientsModal('${h.name}')">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-weight:600; display:flex; align-items:center; gap:6px; font-size:14px;">
+          <div style="font-weight:600; display:flex; align-items:center; gap:4px; font-size:14px;">
             <i data-lucide="building" style="color:var(--primary); width:16px;height:16px;"></i>
             <span>${h.name}</span>
             <button onclick="event.stopPropagation(); renameHospital(${i}, '${h.name}')" style="background:none; border:none; padding:2px; cursor:pointer; color:var(--text-muted); display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="修改醫院名稱">
               <i data-lucide="edit-2" style="width:12px; height:12px;"></i>
+            </button>
+            <button onclick="event.stopPropagation(); deleteHospital(${i}, '${h.name}')" style="background:none; border:none; padding:2px; cursor:pointer; color:var(--triage-red); display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="刪除收容醫院">
+              <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
             </button>
           </div>
           <div style="display:flex; align-items:center; gap:4px;" onclick="event.stopPropagation();">
@@ -694,6 +697,31 @@ function addHospital() {
     capacity: capacity,
     receivedCount: 0
   });
+  
+  sendAction('UPDATE_CONFIGS', { hospitals: state.hospitals });
+}
+
+function deleteHospital(idx, name) {
+  const h = state.hospitals[idx];
+  if (!h) return;
+  
+  let confirmMsg = `確定要刪除「${name}」急救責任醫院嗎？`;
+  if (h.receivedCount > 0) {
+    confirmMsg = `⚠️ 警告：該醫院目前已收容 ${h.receivedCount} 名傷患，刪除後這些傷患的送醫目的地將變更為「未指定」。\n\n確定要刪除嗎？`;
+  }
+  
+  if (!confirm(confirmMsg)) return;
+  
+  // 更新送往該急救責任醫院的患者資訊
+  state.patients.forEach(p => {
+    if (p.transportInfo && p.transportInfo.hospitalName === name) {
+      p.transportInfo.hospitalName = '未指定 (原醫院已刪除)';
+      sendAction('UPDATE_PATIENT', p); // 即時同步
+    }
+  });
+  
+  // 從陣列中移除
+  state.hospitals.splice(idx, 1);
   
   sendAction('UPDATE_CONFIGS', { hospitals: state.hospitals });
 }
