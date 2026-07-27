@@ -186,7 +186,12 @@
 
       <!-- 3. Hospital Capacity (醫院收容容納能力監控) - Spans Full Width -->
       <div class="glass-card">
-        <h3 class="section-title"><i data-lucide="building-2"></i> 醫院收容容納能力監控</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
+          <h3 style="font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="building-2"></i> 醫院收容容納能力監控</h3>
+          <button class="btn btn-secondary" onclick="addHospital()" style="padding: 4px 12px; font-size: 12.5px; height: 28px; display: inline-flex; align-items: center; gap: 6px;">
+            <i data-lucide="plus"></i> 新增收容醫院
+          </button>
+        </div>
         <div id="hospitalList" class="hospital-grid">
           <!-- Dynamic Hospitals -->
         </div>

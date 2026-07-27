@@ -366,7 +366,10 @@ function renderState() {
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div style="font-weight:600; display:flex; align-items:center; gap:6px; font-size:14px;">
             <i data-lucide="building" style="color:var(--primary); width:16px;height:16px;"></i>
-            ${h.name}
+            <span>${h.name}</span>
+            <button onclick="event.stopPropagation(); renameHospital(${i}, '${h.name}')" style="background:none; border:none; padding:2px; cursor:pointer; color:var(--text-muted); display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="修改醫院名稱">
+              <i data-lucide="edit-2" style="width:12px; height:12px;"></i>
+            </button>
           </div>
           <div style="display:flex; align-items:center; gap:4px;" onclick="event.stopPropagation();">
             <span style="font-size:11px; color:var(--text-muted);">限額:</span>
@@ -631,6 +634,67 @@ function changeHospitalCapacity(idx, val) {
   const newCap = parseInt(val);
   if (isNaN(newCap) || newCap < 0) return;
   state.hospitals[idx].capacity = newCap;
+  sendAction('UPDATE_CONFIGS', { hospitals: state.hospitals });
+}
+
+function renameHospital(idx, oldName) {
+  const newName = prompt('請輸入新的醫院名稱：', oldName);
+  if (newName === null) return; // 取消
+  const trimmed = newName.trim();
+  if (!trimmed) {
+    alert('醫院名稱不能為空！');
+    return;
+  }
+  // 檢查是否重複
+  if (state.hospitals.some((h, i) => i !== idx && h.name === trimmed)) {
+    alert('醫院名稱已存在！');
+    return;
+  }
+  
+  // 更新狀態
+  state.hospitals[idx].name = trimmed;
+  
+  // 同步更新已送往該醫院的傷患送醫資訊，避免斷聯
+  state.patients.forEach(p => {
+    if (p.transportInfo && p.transportInfo.hospitalName === oldName) {
+      p.transportInfo.hospitalName = trimmed;
+      sendAction('UPDATE_PATIENT', p); // 即時同步資料庫
+    }
+  });
+  
+  sendAction('UPDATE_CONFIGS', { hospitals: state.hospitals });
+}
+
+function addHospital() {
+  const name = prompt('請輸入新增醫院的名稱：');
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed) {
+    alert('醫院名稱不能為空！');
+    return;
+  }
+  if (state.hospitals.some(h => h.name === trimmed)) {
+    alert('該醫院已存在！');
+    return;
+  }
+  
+  const capStr = prompt('請輸入該醫院的收容額度上限：', '10');
+  if (capStr === null) return;
+  const capacity = parseInt(capStr);
+  if (isNaN(capacity) || capacity < 0) {
+    alert('請輸入有效的數字額度！');
+    return;
+  }
+  
+  const randomId = 'h-' + Math.floor(100 + Math.random() * 900);
+  
+  state.hospitals.push({
+    id: randomId,
+    name: trimmed,
+    capacity: capacity,
+    receivedCount: 0
+  });
+  
   sendAction('UPDATE_CONFIGS', { hospitals: state.hospitals });
 }
 
