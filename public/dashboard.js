@@ -1051,19 +1051,33 @@ function createAndShowMapModal() {
   
   const patients = (typeof state !== 'undefined' && state.patients) || (typeof systemState !== 'undefined' && systemState.patients) || [];
   
-  const markersData = [];
+  // Group patients by coordinate rounded to 5 decimal places (approx 1 meter)
+  const coordinatesMap = {};
   patients.forEach(p => {
     if (p.location) {
       const match = p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
       if (match) {
-        markersData.push({
-          lat: parseFloat(match[1]),
-          lng: parseFloat(match[2]),
-          patient: p
-        });
+        const lat = parseFloat(match[1]);
+        const lng = parseFloat(match[2]);
+        const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+        
+        if (!coordinatesMap[key]) {
+          coordinatesMap[key] = {
+            lat: lat,
+            lng: lng,
+            patients: []
+          };
+        }
+        coordinatesMap[key].patients.push(p);
       }
     }
   });
+  
+  const uniqueGroups = Object.values(coordinatesMap);
+  const totalPatientsMapped = patients.filter(p => {
+    if (!p.location) return false;
+    return p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+  }).length;
 
   const modal = document.createElement('div');
   modal.id = 'locationMapModal';
@@ -1096,12 +1110,12 @@ function createAndShowMapModal() {
       
       <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; gap: 12px;">
-          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block;"></span>紅傷: ${markersData.filter(d => d.patient.triageLevel === 'red').length}人</span>
-          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#f59e0b; border-radius:50%; display:inline-block;"></span>黃傷: ${markersData.filter(d => d.patient.triageLevel === 'yellow').length}人</span>
-          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#10b981; border-radius:50%; display:inline-block;"></span>綠傷: ${markersData.filter(d => d.patient.triageLevel === 'green').length}人</span>
-          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#1e293b; border:1px solid #475569; border-radius:50%; display:inline-block;"></span>黑傷: ${markersData.filter(d => d.patient.triageLevel === 'black').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block;"></span>紅傷: ${patients.filter(p => p.location && p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) && p.triageLevel === 'red').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#f59e0b; border-radius:50%; display:inline-block;"></span>黃傷: ${patients.filter(p => p.location && p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) && p.triageLevel === 'yellow').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#10b981; border-radius:50%; display:inline-block;"></span>綠傷: ${patients.filter(p => p.location && p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) && p.triageLevel === 'green').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#1e293b; border:1px solid #475569; border-radius:50%; display:inline-block;"></span>黑傷: ${patients.filter(p => p.location && p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) && p.triageLevel === 'black').length}人</span>
         </div>
-        <div>共標記 ${markersData.length} 名定位傷患 (總傷患數: ${patients.length}人)</div>
+        <div>共標記 ${totalPatientsMapped} 名定位傷患 (總傷患數: ${patients.length}人)</div>
       </div>
     </div>
     
@@ -1117,6 +1131,16 @@ function createAndShowMapModal() {
         background: #0f172a !important;
         border-left: 1px solid #334155 !important;
         border-bottom: 1px solid #334155 !important;
+      }
+      .leaflet-tooltip.cluster-tooltip {
+        background: rgba(15, 23, 42, 0.9) !important;
+        color: #f59e0b !important;
+        border: 1px solid #f59e0b !important;
+        font-weight: 800 !important;
+        font-size: 11px !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
       }
     </style>
   `;
@@ -1137,56 +1161,129 @@ function createAndShowMapModal() {
   }).addTo(map);
 
   const bounds = [];
-  markersData.forEach(d => {
-    const p = d.patient;
-    let fillColor = '#10b981';
-    if (p.triageLevel === 'red') fillColor = '#ef4444';
-    else if (p.triageLevel === 'yellow') fillColor = '#f59e0b';
-    else if (p.triageLevel === 'black') fillColor = '#1e293b';
-
-    const timeStr = p.lastUpdated ? new Date(p.lastUpdated).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' }) : '-';
+  uniqueGroups.forEach(g => {
+    const groupPatients = g.patients;
     
-    let colorBadge = '';
-    if (p.triageLevel === 'red') colorBadge = '<span style="background:#ef4444;color:white;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">立即 (紅)</span>';
-    else if (p.triageLevel === 'yellow') colorBadge = '<span style="background:#f59e0b;color:black;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">延遲 (黃)</span>';
-    else if (p.triageLevel === 'green') colorBadge = '<span style="background:#10b981;color:white;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">輕傷 (綠)</span>';
-    else if (p.triageLevel === 'black') colorBadge = '<span style="background:#1e293b;color:#94a3b8;border:1px solid #334155;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">死亡 (黑)</span>';
+    // Sort group patients: red > yellow > green > black
+    const severityOrder = { red: 1, yellow: 2, green: 3, black: 4 };
+    groupPatients.sort((a, b) => (severityOrder[a.triageLevel] || 99) - (severityOrder[b.triageLevel] || 99));
+    
+    // Cluster color = most severe patient's triage color
+    const topTriage = groupPatients[0].triageLevel;
+    let fillColor = '#10b981';
+    if (topTriage === 'red') fillColor = '#ef4444';
+    else if (topTriage === 'yellow') fillColor = '#f59e0b';
+    else if (topTriage === 'black') fillColor = '#1e293b';
 
-    let basicInfo = '';
-    if (p.treatmentInfo) {
-      const t = p.treatmentInfo;
-      basicInfo = `${t.name || '未登錄'} / ${t.gender === 'male' ? '男' : t.gender === 'female' ? '女' : '未註明'} / ${t.age ? t.age + '歲' : '年齡未知'}`;
+    let popupHtml = '';
+    let markerRadius = 9;
+    let markerWeight = 2;
+
+    if (groupPatients.length === 1) {
+      const p = groupPatients[0];
+      const timeStr = p.lastUpdated ? new Date(p.lastUpdated).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' }) : '-';
+      
+      let colorBadge = '';
+      if (p.triageLevel === 'red') colorBadge = '<span style="background:#ef4444;color:white;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">立即 (紅)</span>';
+      else if (p.triageLevel === 'yellow') colorBadge = '<span style="background:#f59e0b;color:black;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">延遲 (黃)</span>';
+      else if (p.triageLevel === 'green') colorBadge = '<span style="background:#10b981;color:white;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">輕傷 (綠)</span>';
+      else if (p.triageLevel === 'black') colorBadge = '<span style="background:#1e293b;color:#94a3b8;border:1px solid #334155;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">死亡 (黑)</span>';
+
+      let basicInfo = '';
+      if (p.treatmentInfo) {
+        const t = p.treatmentInfo;
+        basicInfo = `${t.name || '未登錄'} / ${t.gender === 'male' ? '男' : t.gender === 'female' ? '女' : '未註明'} / ${t.age ? t.age + '歲' : '年齡未知'}`;
+      } else {
+        basicInfo = `未登錄 / ${p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未註明'} / ${p.ageGroup === 'child' ? '兒童' : '成人'}`;
+      }
+
+      popupHtml = `
+        <div style="font-family: 'Outfit', 'Noto Sans TC', sans-serif; color: #f8fafc; line-height: 1.5; font-size:12px; min-width: 200px; padding: 4px 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 6px;">
+            <strong style="color:var(--primary); font-size:13.5px;">患者編號: ${p.id}</strong>
+            ${colorBadge}
+          </div>
+          <div style="margin-bottom: 4px;"><strong>基本資料:</strong> ${basicInfo}</div>
+          <div style="margin-bottom: 4px;"><strong>定位座標:</strong> ${p.location}</div>
+          ${p.description ? `<div style="margin-bottom: 6px; color: #cbd5e1;"><strong>特徵備註:</strong> ${p.description}</div>` : ''}
+          <div style="margin-bottom: 8px; font-size: 10px; color: #64748b; text-align: right;">時間: ${timeStr}</div>
+          <div style="border-top:1px solid #334155; padding-top:8px; text-align:center;">
+            <a href="https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lng}" target="_blank" style="background:#f59e0b; color:black; padding:5px 10px; border-radius:4px; text-decoration:none; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:4px; width:100%; justify-content:center;">
+              📍 Google Maps 導航
+            </a>
+          </div>
+        </div>
+      `;
     } else {
-      basicInfo = `未登錄 / ${p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未註明'} / ${p.ageGroup === 'child' ? '兒童' : '成人'}`;
+      // Multiple patients at this spot!
+      markerRadius = 13; // Larger marker
+      markerWeight = 3;  // Thicker border
+      
+      const patientItemsHtml = groupPatients.map(p => {
+        let colorBadge = '';
+        if (p.triageLevel === 'red') colorBadge = '<span style="background:#ef4444;color:white;padding:1px 4px;border-radius:3px;font-weight:bold;font-size:9px;">紅</span>';
+        else if (p.triageLevel === 'yellow') colorBadge = '<span style="background:#f59e0b;color:black;padding:1px 4px;border-radius:3px;font-weight:bold;font-size:9px;">黃</span>';
+        else if (p.triageLevel === 'green') colorBadge = '<span style="background:#10b981;color:white;padding:1px 4px;border-radius:3px;font-weight:bold;font-size:9px;">綠</span>';
+        else if (p.triageLevel === 'black') colorBadge = '<span style="background:#1e293b;color:#94a3b8;border:1px solid #334155;padding:1px 4px;border-radius:3px;font-weight:bold;font-size:9px;">黑</span>';
+
+        let basicInfo = '';
+        if (p.treatmentInfo) {
+          const t = p.treatmentInfo;
+          basicInfo = `${t.name || '未登錄'} (${t.gender === 'male' ? '男' : t.gender === 'female' ? '女' : '未註明'} / ${t.age ? t.age + '歲' : '年齡未知'})`;
+        } else {
+          basicInfo = `${p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未註明'} / ${p.ageGroup === 'child' ? '兒童' : '成人'}`;
+        }
+        
+        return `
+          <div style="border-bottom: 1px solid rgba(255,255,255,0.06); padding: 6px 0; font-size: 11.5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3px;">
+              <strong style="color:var(--primary);">編號: ${p.id}</strong>
+              ${colorBadge}
+            </div>
+            <div style="color: var(--text-muted); margin-bottom: 2px;">基本: ${basicInfo}</div>
+            ${p.description ? `<div style="color: #cbd5e1; font-style: italic;">備註: ${p.description}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      popupHtml = `
+        <div style="font-family: 'Outfit', 'Noto Sans TC', sans-serif; color: #f8fafc; line-height: 1.4; font-size:12px; min-width: 220px; max-width: 265px; padding: 4px 0;">
+          <div style="border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 6px; display:flex; align-items:center; gap:6px;">
+            <i data-lucide="users" style="width:14px; height:14px; color:#f59e0b;"></i>
+            <strong style="color:#f59e0b; font-size:13px;">此點共有 ${groupPatients.length} 位病患</strong>
+          </div>
+          <div style="max-height: 180px; overflow-y: auto; padding-right: 4px;">
+            ${patientItemsHtml}
+          </div>
+          <div style="margin-top: 8px; font-size:11px; color:var(--text-muted);">座標: ${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}</div>
+          <div style="border-top:1px solid #334155; padding-top:8px; margin-top:8px; text-align:center;">
+            <a href="https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lng}" target="_blank" style="background:#f59e0b; color:black; padding:5px 10px; border-radius:4px; text-decoration:none; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:4px; width: 100%; justify-content: center;">
+              📍 Google Maps 導航
+            </a>
+          </div>
+        </div>
+      `;
     }
 
-    const popupHtml = `
-      <div style="font-family: 'Outfit', 'Noto Sans TC', sans-serif; color: #f8fafc; line-height: 1.5; font-size:12px; min-width: 200px; padding: 4px 0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 6px;">
-          <strong style="color:var(--primary); font-size:13.5px;">患者編號: ${p.id}</strong>
-          ${colorBadge}
-        </div>
-        <div style="margin-bottom: 4px;"><strong>基本資料:</strong> ${basicInfo}</div>
-        <div style="margin-bottom: 4px;"><strong>定位座標:</strong> ${p.location}</div>
-        ${p.description ? `<div style="margin-bottom: 6px; color: #cbd5e1;"><strong>特徵備註:</strong> ${p.description}</div>` : ''}
-        <div style="margin-bottom: 8px; font-size: 10px; color: #64748b; text-align: right;">時間: ${timeStr}</div>
-        <div style="border-top:1px solid #334155; padding-top:8px; text-align:center;">
-          <a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}" target="_blank" style="background:#f59e0b; color:black; padding:5px 10px; border-radius:4px; text-decoration:none; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-            📍 Google Maps 導航
-          </a>
-        </div>
-      </div>
-    `;
-
-    L.circleMarker([d.lat, d.lng], {
-      radius: 9,
+    const marker = L.circleMarker([g.lat, g.lng], {
+      radius: markerRadius,
       fillColor: fillColor,
       color: '#ffffff',
-      weight: 2,
+      weight: markerWeight,
       fillOpacity: 0.95
     }).addTo(map).bindPopup(popupHtml);
     
-    bounds.push([d.lat, d.lng]);
+    // If multiple patients, add a permanent tooltip showing the count next to the marker
+    if (groupPatients.length > 1) {
+      marker.bindTooltip(`${groupPatients.length} 人`, {
+        permanent: true,
+        direction: 'right',
+        className: 'cluster-tooltip',
+        offset: [8, 0]
+      });
+    }
+    
+    bounds.push([g.lat, g.lng]);
   });
 
   if (bounds.length > 0) {
