@@ -279,6 +279,25 @@ function renderState() {
   if (statTreatmentEl) statTreatmentEl.innerText = `${locTreatment}人`;
   if (statTransportEl) statTransportEl.innerText = `${locTransport}人`;
 
+  // Calculate percentages and update progress bars
+  const totalLoc = locTriage + locTreatment + locTransport;
+  const pctTriage = totalLoc > 0 ? (locTriage / totalLoc) * 100 : 0;
+  const pctTreatment = totalLoc > 0 ? (locTreatment / totalLoc) * 100 : 0;
+  const pctTransport = totalLoc > 0 ? (locTransport / totalLoc) * 100 : 0;
+
+  const barTriageEl = document.getElementById('barTriage');
+  const barTreatmentEl = document.getElementById('barTreatment');
+  const barTransportEl = document.getElementById('barTransport');
+  const locPercentEl = document.getElementById('locStatPercent');
+
+  if (barTriageEl) barTriageEl.style.width = `${pctTriage}%`;
+  if (barTreatmentEl) barTreatmentEl.style.width = `${pctTreatment}%`;
+  if (barTransportEl) barTransportEl.style.width = `${pctTransport}%`;
+  if (locPercentEl) {
+    const finishedPct = totalLoc > 0 ? Math.round(((locTreatment + locTransport) / totalLoc) * 100) : 0;
+    locPercentEl.innerText = `${finishedPct}%`;
+  }
+
   // 4. Render Patient Table (Waiting)
   const waitingTbody = document.getElementById('waitingPatientTableBody');
   if (waitingPatients.length === 0) {
