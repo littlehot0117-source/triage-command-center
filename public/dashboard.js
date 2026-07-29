@@ -260,23 +260,50 @@ function renderState() {
   document.getElementById('waitingCount').innerText = waitingPatients.length;
   document.getElementById('transportedCount').innerText = transportedPatients.length;
 
+  // Calculate Real-time location stats
+  let locTriage = 0;
+  let locTreatment = 0;
+  waitingPatients.forEach(p => {
+    if (p.treatmentInfo) {
+      locTreatment++;
+    } else {
+      locTriage++;
+    }
+  });
+  let locTransport = transportedPatients.length;
 
+  const statTriageEl = document.getElementById('locStatTriage');
+  const statTreatmentEl = document.getElementById('locStatTreatment');
+  const statTransportEl = document.getElementById('locStatTransport');
+  if (statTriageEl) statTriageEl.innerText = `${locTriage}人`;
+  if (statTreatmentEl) statTreatmentEl.innerText = `${locTreatment}人`;
+  if (statTransportEl) statTransportEl.innerText = `${locTransport}人`;
 
   // 4. Render Patient Table (Waiting)
   const waitingTbody = document.getElementById('waitingPatientTableBody');
   if (waitingPatients.length === 0) {
-    waitingTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td></tr>`;
+    waitingTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td></tr>`;
   } else {
     waitingTbody.innerHTML = waitingPatients.map(p => {
       const timeStr = new Date(p.timestamp).toLocaleTimeString('zh-TW', { hour12: false });
       const ageGroupZh = p.ageGroup === 'child' ? '孩童' : '成人';
       const genderZh = p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未知';
+      
+      // Determine real-time location badge
+      let locationBadgeHtml = '';
+      if (p.treatmentInfo) {
+        locationBadgeHtml = `<span class="badge" style="background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2); padding:2px 6px; border-radius:4px; font-weight:600; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; background:#10b981; border-radius:50%;"></span>治療區</span>`;
+      } else {
+        locationBadgeHtml = `<span class="badge" style="background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.2); padding:2px 6px; border-radius:4px; font-weight:600; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; background:#f59e0b; border-radius:50%;"></span>檢傷區</span>`;
+      }
+
       return `
         <tr class="patient-row-${p.triageLevel}">
           <td><strong>${p.id}</strong></td>
           <td><span class="triage-badge ${p.triageLevel}">${getTriageZh(p.triageLevel)}</span></td>
           <td>${genderZh} | ${ageGroupZh} | ${p.description || '<span style="color:var(--text-muted)">無備註</span>'}</td>
           <td>${formatLocation(p.location)}</td>
+          <td>${locationBadgeHtml}</td>
           <td>${getTreatmentRecordCell(p)}</td>
           <td>${timeStr}</td>
           <td>
