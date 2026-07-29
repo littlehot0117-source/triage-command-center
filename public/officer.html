@@ -16,6 +16,35 @@
   <link rel="apple-touch-icon" href="icon.svg">
   
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Responsive Fluid Typography overrides for login card on different phone screens */
+    #loginSection h2 {
+      font-size: clamp(20px, 5.5vw, 26px) !important;
+    }
+    #loginSection p {
+      font-size: clamp(12.5px, 3.5vw, 15px) !important;
+      line-height: 1.4;
+    }
+    #loginSection .login-btn {
+      font-size: clamp(13.5px, 3.8vw, 17px) !important;
+      padding: clamp(10px, 2.5vw, 16px) 6px !important;
+    }
+    #loginSection input.input-control {
+      font-size: clamp(12.5px, 3.5vw, 15px) !important;
+      height: clamp(36px, 9vw, 44px) !important;
+    }
+    #loginSection button.btn-secondary {
+      font-size: clamp(12.5px, 3.5vw, 15px) !important;
+      height: clamp(36px, 9vw, 44px) !important;
+    }
+    #loginSection .btn {
+      font-size: clamp(12.5px, 3.5vw, 15.5px) !important;
+      height: clamp(36px, 9vw, 44px) !important;
+    }
+    #loginSection div[style*="font-size: 12px"] {
+      font-size: clamp(11.5px, 3.2vw, 14px) !important;
+    }
+  </style>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -42,16 +71,18 @@
       </div>
 
       <!-- Quick Navigation Links (治療區與後送官連結) -->
-      <div style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; text-align: left;">
-        <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+      <div style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; text-align: left;">
+        <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
           <i data-lucide="navigation-2" style="width: 12px; height: 12px;"></i> 跨系統快速連結 (快捷導航)
         </div>
-        <a href="treatment.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); font-weight: 700; height: 38px; font-size: 13px;">
-          <i data-lucide="activity" style="width:16px; height:16px;"></i> 進入治療區系統 (臨床病歷)
-        </a>
-        <a href="index.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.05); font-weight: 700; height: 38px; font-size: 13px;">
-          <i data-lucide="ambulance" style="width:16px; height:16px;"></i> 進入指揮中心 (後送調度)
-        </a>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <a href="treatment.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); font-weight: 700; height: 38px; font-size: clamp(11px, 3.2vw, 14px) !important; flex: 1; text-align: center; padding: 0 4px; white-space: nowrap;">
+            <i data-lucide="activity" style="width:14px; height:14px;"></i> 進入治療區系統
+          </a>
+          <a href="index.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.05); font-weight: 700; height: 38px; font-size: clamp(11px, 3.2vw, 14px) !important; flex: 1; text-align: center; padding: 0 4px; white-space: nowrap;">
+            <i data-lucide="ambulance" style="width:14px; height:14px;"></i> 進入指揮中心
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -69,6 +100,9 @@
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
+          <button onclick="openLocationMap()" class="btn btn-secondary" style="height: 28px; padding: 0 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05); font-weight: 700; cursor: pointer; border-radius: 4px; outline: none; transition: all 0.2s;">
+            <i data-lucide="map" style="width: 12px; height: 12px;"></i> 定位地圖
+          </button>
           <span id="connStatusBadge" style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
           <span id="connStatusText" style="font-size: 11px; color: var(--text-muted);">離線模式</span>
         </div>
@@ -82,19 +116,19 @@
       <div id="pageTriage" class="tab-content-page">
         <!-- Triage Selector (START vs JumpSTART vs Direct) -->
         <div style="display: flex; gap: 6px; margin-bottom: 16px;">
-          <button id="tabWizard" class="btn" style="flex: 1.1; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('wizard')">
+          <button id="tabWizard" class="btn btn-secondary" style="flex: 1.1; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('wizard')">
             <i data-lucide="help-circle" style="width:13px; height:13px;"></i> START引導
           </button>
           <button id="tabJumpStart" class="btn btn-secondary" style="flex: 1.2; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('jumpstart')">
             <i data-lucide="baby" style="width:13px; height:13px;"></i> JumpSTART
           </button>
-          <button id="tabDirect" class="btn btn-secondary" style="flex: 0.8; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('direct')">
+          <button id="tabDirect" class="btn" style="flex: 0.8; font-size: 11px; padding: 8px 4px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="switchTriageMethod('direct')">
             <i data-lucide="palette" style="width:13px; height:13px;"></i> 直接分類
           </button>
         </div>
 
         <!-- Wizard Flow -->
-        <div id="wizardPanel" class="wizard-box">
+        <div id="wizardPanel" class="wizard-box" style="display: none;">
           <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between;">
             <span>START 檢傷評估</span>
             <span id="stepIndicator">步驟 1 / 5</span>
@@ -230,7 +264,7 @@
         </div>
 
         <!-- Direct Override -->
-        <div id="directPanel" class="wizard-box" style="display: none;">
+        <div id="directPanel" class="wizard-box">
           <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">手動直接檢傷顏色</h3>
           <div class="direct-triage-grid">
             <button class="triage-color-btn red" onclick="setDirectColor('red')">

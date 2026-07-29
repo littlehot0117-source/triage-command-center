@@ -1018,3 +1018,175 @@ function setVitalWarningStyle(elementId, isAbnormal) {
 function closeTreatmentRecordModal() {
   document.getElementById('treatmentRecordModal').classList.remove('show');
 }
+
+// 🗺️ 病患即時定位系統 (Leaflet Map Modal)
+function openLocationMap() {
+  if (!window.L) {
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+    
+    if (!document.getElementById('leaflet-js')) {
+      const script = document.createElement('script');
+      script.id = 'leaflet-js';
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => {
+        createAndShowMapModal();
+      };
+      document.head.appendChild(script);
+      return;
+    }
+  } else {
+    createAndShowMapModal();
+  }
+}
+
+function createAndShowMapModal() {
+  let oldModal = document.getElementById('locationMapModal');
+  if (oldModal) oldModal.remove();
+  
+  const patients = (typeof state !== 'undefined' && state.patients) || (typeof systemState !== 'undefined' && systemState.patients) || [];
+  
+  const markersData = [];
+  patients.forEach(p => {
+    if (p.location) {
+      const match = p.location.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+      if (match) {
+        markersData.push({
+          lat: parseFloat(match[1]),
+          lng: parseFloat(match[2]),
+          patient: p
+        });
+      }
+    }
+  });
+
+  const modal = document.createElement('div');
+  modal.id = 'locationMapModal';
+  modal.style.position = 'fixed';
+  modal.style.top = '0';
+  modal.style.left = '0';
+  modal.style.width = '100vw';
+  modal.style.height = '100vh';
+  modal.style.backgroundColor = 'rgba(9, 13, 22, 0.85)';
+  modal.style.backdropFilter = 'blur(6px)';
+  modal.style.zIndex = '9999';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+  modal.style.padding = '20px 10px';
+  
+  modal.innerHTML = `
+    <div class="glass-card" style="width: 100%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; margin: 0; padding: 20px; background: rgba(17, 24, 39, 0.95); border: 1px solid var(--border-color); box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="map" style="color: #f59e0b; width: 22px; height: 22px;"></i>
+          <span style="font-weight: 800; font-size: 18px; color: var(--text-main);">全傷患即時定位監控地圖</span>
+        </div>
+        <button onclick="document.getElementById('locationMapModal').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+          <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+        </button>
+      </div>
+      
+      <div id="locationMapEl" style="flex: 1; width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: #0c111d; position: relative;"></div>
+      
+      <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; gap: 12px;">
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block;"></span>紅傷: ${markersData.filter(d => d.patient.triageLevel === 'red').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#f59e0b; border-radius:50%; display:inline-block;"></span>黃傷: ${markersData.filter(d => d.patient.triageLevel === 'yellow').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#10b981; border-radius:50%; display:inline-block;"></span>綠傷: ${markersData.filter(d => d.patient.triageLevel === 'green').length}人</span>
+          <span style="display: flex; align-items: center; gap: 4px;"><span style="width:10px; height:10px; background:#1e293b; border:1px solid #475569; border-radius:50%; display:inline-block;"></span>黑傷: ${markersData.filter(d => d.patient.triageLevel === 'black').length}人</span>
+        </div>
+        <div>共標記 ${markersData.length} 名定位傷患 (總傷患數: ${patients.length}人)</div>
+      </div>
+    </div>
+    
+    <style>
+      .leaflet-popup-content-wrapper {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border: 1px solid #334155 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+      }
+      .leaflet-popup-tip {
+        background: #0f172a !important;
+        border-left: 1px solid #334155 !important;
+        border-bottom: 1px solid #334155 !important;
+      }
+    </style>
+  `;
+  
+  document.body.appendChild(modal);
+  if (window.lucide) window.lucide.createIcons({ attrs: { style: 'stroke: currentColor;' } });
+
+  const defaultCenter = [23.973875, 120.982024]; 
+  const map = L.map('locationMapEl').setView(defaultCenter, 8);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20
+  }).addTo(map);
+
+  const bounds = [];
+  markersData.forEach(d => {
+    const p = d.patient;
+    let fillColor = '#10b981';
+    if (p.triageLevel === 'red') fillColor = '#ef4444';
+    else if (p.triageLevel === 'yellow') fillColor = '#f59e0b';
+    else if (p.triageLevel === 'black') fillColor = '#1e293b';
+
+    const timeStr = p.lastUpdated ? new Date(p.lastUpdated).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' }) : '-';
+    
+    let colorBadge = '';
+    if (p.triageLevel === 'red') colorBadge = '<span style="background:#ef4444;color:white;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">立即 (紅)</span>';
+    else if (p.triageLevel === 'yellow') colorBadge = '<span style="background:#f59e0b;color:black;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">延遲 (黃)</span>';
+    else if (p.triageLevel === 'green') colorBadge = '<span style="background:#10b981;color:white;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">輕傷 (綠)</span>';
+    else if (p.triageLevel === 'black') colorBadge = '<span style="background:#1e293b;color:#94a3b8;border:1px solid #334155;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:10px;">死亡 (黑)</span>';
+
+    let basicInfo = '';
+    if (p.treatmentInfo) {
+      const t = p.treatmentInfo;
+      basicInfo = `${t.name || '未登錄'} / ${t.gender === 'male' ? '男' : t.gender === 'female' ? '女' : '未註明'} / ${t.age ? t.age + '歲' : '年齡未知'}`;
+    } else {
+      basicInfo = `未登錄 / ${p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : '未註明'} / ${p.ageGroup === 'child' ? '兒童' : '成人'}`;
+    }
+
+    const popupHtml = `
+      <div style="font-family: 'Outfit', 'Noto Sans TC', sans-serif; color: #f8fafc; line-height: 1.5; font-size:12px; min-width: 200px; padding: 4px 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 6px;">
+          <strong style="color:var(--primary); font-size:13.5px;">患者編號: ${p.id}</strong>
+          ${colorBadge}
+        </div>
+        <div style="margin-bottom: 4px;"><strong>基本資料:</strong> ${basicInfo}</div>
+        <div style="margin-bottom: 4px;"><strong>定位座標:</strong> ${p.location}</div>
+        ${p.description ? `<div style="margin-bottom: 6px; color: #cbd5e1;"><strong>特徵備註:</strong> ${p.description}</div>` : ''}
+        <div style="margin-bottom: 8px; font-size: 10px; color: #64748b; text-align: right;">時間: ${timeStr}</div>
+        <div style="border-top:1px solid #334155; padding-top:8px; text-align:center;">
+          <a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}" target="_blank" style="background:#f59e0b; color:black; padding:5px 10px; border-radius:4px; text-decoration:none; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+            📍 Google Maps 導航
+          </a>
+        </div>
+      </div>
+    `;
+
+    L.circleMarker([d.lat, d.lng], {
+      radius: 9,
+      fillColor: fillColor,
+      color: '#ffffff',
+      weight: 2,
+      fillOpacity: 0.95
+    }).addTo(map).bindPopup(popupHtml);
+    
+    bounds.push([d.lat, d.lng]);
+  });
+
+  if (bounds.length > 0) {
+    map.fitBounds(bounds, { padding: [30, 30] });
+  }
+}
