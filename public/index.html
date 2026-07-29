@@ -109,102 +109,96 @@
         <i data-lucide="skull" style="color: var(--triage-black); width: 32px; height: 32px;"></i>
       </div>
       
+      <!-- Real-time Location Stats (Far Right Column - Spans 2 Rows) -->
+      <div class="glass-card stat-card total" style="grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; height: 100%; border-left-color: var(--primary); padding: 16px 20px;">
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <h3 style="font-size: 13px; display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 700; color: var(--text-main);"><i data-lucide="pie-chart" style="color:var(--primary); width:15px; height:15px;"></i> 即時位置統計</h3>
+          <strong id="locStatPercent" style="color:var(--primary); font-size:12.5px; font-weight:700;">0%</strong>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: center; width: 100%;">
+          <!-- Triage Area Card -->
+          <div style="background: rgba(245, 158, 11, 0.04); border: 1px solid rgba(245, 158, 11, 0.1); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
+                <span style="width: 6px; height: 6px; background: #f59e0b; border-radius: 50%;"></span>
+                <span>檢傷區</span>
+              </div>
+              <div style="font-size: 10px; color: var(--text-muted);">剛評估未填病歷</div>
+            </div>
+            <div style="font-size: 22px; font-weight: 800; color: #f59e0b; line-height: 1;" id="locStatTriage">0人</div>
+          </div>
+
+          <!-- Treatment Area Card -->
+          <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.1); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
+                <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span>
+                <span>治療區</span>
+              </div>
+              <div style="font-size: 10px; color: var(--text-muted);">治療中已登錄病歷</div>
+            </div>
+            <div style="font-size: 22px; font-weight: 800; color: #10b981; line-height: 1;" id="locStatTreatment">0人</div>
+          </div>
+
+          <!-- Transported Card -->
+          <div style="background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.1); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #3b82f6; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
+                <span style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%;"></span>
+                <span>已送醫</span>
+              </div>
+              <div style="font-size: 10px; color: var(--text-muted);">完成後送已離場</div>
+            </div>
+            <div style="font-size: 22px; font-weight: 800; color: #3b82f6; line-height: 1;" id="locStatTransport">0人</div>
+          </div>
+        </div>
+        
+        <!-- Location Progress visual overlay -->
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); width: 100%;">
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <span>現場處置與送醫率</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; display: flex;">
+            <div id="barTriage" style="width: 0%; height: 100%; background: #f59e0b; transition: width 0.3s ease;"></div>
+            <div id="barTreatment" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
+            <div id="barTransport" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+      </div>
 
     </div>
 
     <!-- Main Dashboard Layout (Vertically Stacked with Dynamic Widths) -->
     <div style="display: flex; flex-direction: column; gap: 30px; margin-bottom: 30px;">
       
-      <!-- Patient List and Stats Side-by-Side -->
-      <div style="display: flex; gap: 20px; width: 100%; flex-wrap: wrap; align-items: stretch;">
-        <!-- Left: Patient List (flex: 3) -->
-        <div class="glass-card" style="flex: 3; min-width: 600px; display: flex; flex-direction: column; margin-bottom: 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;"><i data-lucide="list-todo"></i> 傷患名單即時看板</h3>
-            <span id="waitingCount" class="badge-count">0</span>
-          </div>
-          <div class="table-container" style="flex: 1;">
-            <table>
-              <thead>
-                <tr>
-                  <th>傷患 ID</th>
-                  <th>檢傷等級</th>
-                  <th>特徵/性別/年齡</th>
-                  <th>地點</th>
-                  <th>即時位置</th>
-                  <th>臨床病歷</th>
-                  <th>時間</th>
-                  <th>調度送醫</th>
-                </tr>
-              </thead>
-              <tbody id="waitingPatientTableBody">
-                <!-- Dynamic Rows -->
-                <tr>
-                  <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- 1. Patient List (傷患名單即時看板) - Spans Full Width -->
+      <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
+          <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;"><i data-lucide="list-todo"></i> 傷患名單即時看板</h3>
+          <span id="waitingCount" class="badge-count">0</span>
         </div>
-
-        <!-- Right: Location Statistics Card (flex: 1) -->
-        <div class="glass-card" style="flex: 1; min-width: 280px; max-width: 360px; display: flex; flex-direction: column; justify-content: flex-start; margin-bottom: 0; height: auto;">
-          <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;"><i data-lucide="pie-chart" style="color:var(--primary);"></i> 即時位置統計</h3>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 16px; flex: 1; justify-content: space-between;">
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <!-- Triage Area Card -->
-              <div style="background: rgba(245, 158, 11, 0.04); border: 1px solid rgba(245, 158, 11, 0.15); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                  <div style="font-size: 13px; font-weight: 700; color: #f59e0b; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></span>
-                    <span>檢傷區 (Triage)</span>
-                  </div>
-                  <div style="font-size: 11px; color: var(--text-muted);">現場剛評估尚未填病歷</div>
-                </div>
-                <div style="font-size: 30px; font-weight: 800; color: #f59e0b; line-height: 1;" id="locStatTriage">0人</div>
-              </div>
-
-              <!-- Treatment Area Card -->
-              <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                  <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
-                    <span>治療區 (Treatment)</span>
-                  </div>
-                  <div style="font-size: 11px; color: var(--text-muted);">治療中已登錄臨床病歷</div>
-                </div>
-                <div style="font-size: 30px; font-weight: 800; color: #10b981; line-height: 1;" id="locStatTreatment">0人</div>
-              </div>
-
-              <!-- Transported Card -->
-              <div style="background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                  <div style="font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%;"></span>
-                    <span>已送醫 (Transported)</span>
-                  </div>
-                  <div style="font-size: 11px; color: var(--text-muted);">已完成調度並後送離場</div>
-                </div>
-                <div style="font-size: 30px; font-weight: 800; color: #3b82f6; line-height: 1;" id="locStatTransport">0人</div>
-              </div>
-            </div>
-            
-            <!-- Location Progress visual overlay -->
-            <div style="margin-top: 8px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.05);">
-              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span>現場處置與送醫率</span>
-                <strong id="locStatPercent" style="color:var(--text-main); font-weight:700;">0%</strong>
-              </div>
-              <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; display: flex;">
-                <div id="barTriage" style="width: 0%; height: 100%; background: #f59e0b; transition: width 0.3s ease;"></div>
-                <div id="barTreatment" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
-                <div id="barTransport" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s ease;"></div>
-              </div>
-            </div>
-          </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>傷患 ID</th>
+                <th>檢傷等級</th>
+                <th>特徵/性別/年齡</th>
+                <th>地點</th>
+                <th>即時位置</th>
+                <th>臨床病歷</th>
+                <th>時間</th>
+                <th>調度送醫</th>
+              </tr>
+            </thead>
+            <tbody id="waitingPatientTableBody">
+              <!-- Dynamic Rows -->
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px 0;">尚無任何傷患紀錄，等待現場回報中...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
