@@ -182,13 +182,105 @@ function sendAction(type, data) {
 }
 
 // Session Officer Management
-function selectOfficer(code) {
+const DEFAULT_OFFICERS = [
+  { name: '嘉明', code: 'A' },
+  { name: '南廷', code: 'B' },
+  { name: '意婷', code: 'C' },
+  { name: '詠翔', code: 'D' },
+  { name: '俊璋', code: 'E' },
+  { name: '睿聰', code: 'F' },
+  { name: '岳峰', code: 'G' },
+  { name: '郁智', code: 'H' }
+];
+
+let officersList = JSON.parse(localStorage.getItem('triage_officers_list'));
+if (!officersList) {
+  officersList = DEFAULT_OFFICERS;
+  localStorage.setItem('triage_officers_list', JSON.stringify(officersList));
+}
+
+function renderOfficerSelectGrid() {
+  const grid = document.getElementById('officerSelectGrid');
+  if (!grid) return;
+  
+  grid.innerHTML = officersList.map(o => `
+    <button class="login-btn" style="font-size: 14px; padding: 12px 8px; font-weight:700;" onclick="selectOfficer('${o.code}', '${o.name}')">
+      ${o.name} (${o.code})
+    </button>
+  `).join('');
+  
+  // Re-run lucide for icons inside the selection overlay
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+function addNewOfficer() {
+  const input = document.getElementById('newOfficerInput');
+  if (!input) return;
+  const name = input.value.trim();
+  if (!name) {
+    alert('請輸入檢傷官姓名！');
+    return;
+  }
+  
+  // 檢查是否重複
+  if (officersList.some(o => o.name === name)) {
+    alert('該檢傷官姓名已存在！');
+    return;
+  }
+  
+  // 尋找下一個未使用的代號字母
+  const usedCodes = new Set(officersList.map(o => o.code));
+  let nextCode = '';
+  for (let i = 65; i <= 90; i++) { // A-Z
+    const letter = String.fromCharCode(i);
+    if (!usedCodes.has(letter)) {
+      nextCode = letter;
+      break;
+    }
+  }
+  
+  if (!nextCode) {
+    nextCode = 'Z' + String.fromCharCode(65 + (usedCodes.size % 26));
+  }
+  
+  officersList.push({ name, code: nextCode });
+  localStorage.setItem('triage_officers_list', JSON.stringify(officersList));
+  
+  input.value = '';
+  renderOfficerSelectGrid();
+  playTriageBeep('success');
+}
+
+function selectOfficer(code, name) {
   officerCode = code;
   sessionStorage.setItem('triage_officer_code', code);
   
+  // 頁面重整時，若無傳入 name，從 LocalStorage 反查
+  let officerName = name;
+  if (!officerName) {
+    const list = JSON.parse(localStorage.getItem('triage_officers_list')) || DEFAULT_OFFICERS;
+    const found = list.find(o => o.code === code);
+    officerName = found ? found.name : '';
+  }
+  
+  if (officerName) {
+    sessionStorage.setItem('triage_officer_name', officerName);
+  }
+  
   document.getElementById('loginSection').style.display = 'none';
   document.getElementById('triageSection').style.display = 'flex';
-  document.getElementById('officerDisplay').innerText = `檢傷官 ${code}`;
+  
+  const display = document.getElementById('officerDisplay');
+  if (display) {
+    display.innerText = officerName ? `檢傷官: ${officerName} (${code})` : `檢傷官 ${code}`;
+  }
+  
+  const settingsDisplay = document.getElementById('settingsOfficerDisplay');
+  if (settingsDisplay) {
+    settingsDisplay.innerText = officerName ? `${officerName} (${code})` : `檢傷官 ${code}`;
+  }
   
   // Set tab back to triage
   switchAppTab('triage');
@@ -199,9 +291,11 @@ function selectOfficer(code) {
 
 function logoutOfficer() {
   sessionStorage.removeItem('triage_officer_code');
+  sessionStorage.removeItem('triage_officer_name');
   officerCode = null;
   document.getElementById('loginSection').style.display = 'flex';
   document.getElementById('triageSection').style.display = 'none';
+  renderOfficerSelectGrid();
 }
 
 // App tab switching (App Mode tabs)
@@ -579,7 +673,7 @@ function submitTriage() {
   const counterKey = 'triage_counter_' + officerCode;
   let counter = parseInt(localStorage.getItem(counterKey) || '1');
   
-  const patientId = officerCode + String(counter).padStart(3, '0');
+  const patientId = officerCode + String(counter).padStart(2, '0');
   
   const payload = {
     id: patientId,
@@ -870,6 +964,9 @@ function getCurrentGPS(inputId, btnId) {
 document.addEventListener('DOMContentLoaded', () => {
   initConnection();
   registerPWA();
+  
+  // Render the triage officer selector list
+  renderOfficerSelectGrid();
   
   const savedCode = sessionStorage.getItem('triage_officer_code');
   if (savedCode) {

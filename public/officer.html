@@ -22,23 +22,36 @@
 <body class="app-body">
 
   <!-- 1. Login Selection Pane (overlay if no officer code selected) -->
-  <div id="loginSection" class="officer-container" style="flex: 1; display: flex; align-items: center; justify-content: center;">
-    <div class="glass-card login-card" style="margin: 0; width: 100%;">
-      <i data-lucide="shield-alert" style="color: var(--triage-yellow); width: 48px; height: 48px; margin: 0 auto 12px;"></i>
-      <h2 style="font-size: 24px; margin-bottom: 8px;">選擇您的檢傷官代號</h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">請選擇一個未被登入的代號 (A - J)，此代號將會用於您判定患者代碼的開頭（例如：A001, A002）。</p>
+  <div id="loginSection" class="officer-container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px 10px;">
+    <div class="glass-card login-card" style="margin: 0; width: 100%; max-width: 440px;">
+      <i data-lucide="shield-alert" style="color: var(--triage-yellow); width: 44px; height: 44px; margin: 0 auto 12px;"></i>
+      <h2 style="font-size: 22px; margin-bottom: 8px;">選擇您的檢傷官姓名</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">請點選您的姓名進行登入。您的判定代碼將使用對應代號開頭（例如：A001）。</p>
       
-      <div class="login-grid">
-        <button class="login-btn" onclick="selectOfficer('A')">A</button>
-        <button class="login-btn" onclick="selectOfficer('B')">B</button>
-        <button class="login-btn" onclick="selectOfficer('C')">C</button>
-        <button class="login-btn" onclick="selectOfficer('D')">D</button>
-        <button class="login-btn" onclick="selectOfficer('E')">E</button>
-        <button class="login-btn" onclick="selectOfficer('F')">F</button>
-        <button class="login-btn" onclick="selectOfficer('G')">G</button>
-        <button class="login-btn" onclick="selectOfficer('H')">H</button>
-        <button class="login-btn" onclick="selectOfficer('I')">I</button>
-        <button class="login-btn" onclick="selectOfficer('J')">J</button>
+      <!-- Dynamic Selection Grid -->
+      <div id="officerSelectGrid" class="login-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 12px 0;">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Add Officer input -->
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 24px;">
+        <input type="text" id="newOfficerInput" class="input-control" placeholder="新增檢傷官姓名" style="height: 38px; flex: 1; font-size: 13px;">
+        <button onclick="addNewOfficer()" class="btn btn-secondary" style="height: 38px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px;">
+          <i data-lucide="plus" style="width: 14px; height: 14px;"></i> 新增
+        </button>
+      </div>
+
+      <!-- Quick Navigation Links (治療區與後送官連結) -->
+      <div style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; text-align: left;">
+        <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+          <i data-lucide="navigation-2" style="width: 12px; height: 12px;"></i> 跨系統快速連結 (快捷導航)
+        </div>
+        <a href="treatment.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); font-weight: 700; height: 38px; font-size: 13px;">
+          <i data-lucide="activity" style="width:16px; height:16px;"></i> 進入治療區系統 (臨床病歷)
+        </a>
+        <a href="index.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.05); font-weight: 700; height: 38px; font-size: 13px;">
+          <i data-lucide="ambulance" style="width:16px; height:16px;"></i> 進入指揮中心 (後送調度)
+        </a>
       </div>
     </div>
   </div>
