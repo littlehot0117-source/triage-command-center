@@ -62,18 +62,16 @@
   <div class="dashboard-container">
     <!-- Top Stats Summary -->
     <div class="stats-grid">
-      <!-- Total (Left Column - Spans 2 Rows) -->
-      <div class="glass-card stat-card total" style="display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; height: 100%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex: 1;">
-          <div class="stat-info">
-            <h3 style="font-size: 13px;">📋 總收容 / 總傷患數</h3>
-            <div id="statTotal" class="stat-value" style="font-size: 40px; margin-top: 8px;">0 / 0</div>
-          </div>
-          <i data-lucide="users" style="color: var(--primary); width: 44px; height: 44px;"></i>
+      <!-- Column 1 Top: Total -->
+      <div class="glass-card stat-card total">
+        <div class="stat-info">
+          <h3>📋 總收容 / 總傷患數</h3>
+          <div id="statTotal" class="stat-value">0 / 0</div>
         </div>
+        <i data-lucide="users" style="color: var(--primary); width: 32px; height: 32px;"></i>
       </div>
       
-      <!-- Red (Middle Top) -->
+      <!-- Column 2 Top: Red (Immediate) -->
       <div class="glass-card stat-card red">
         <div class="stat-info">
           <h3>🔴 立即治療 (Immediate)</h3>
@@ -82,7 +80,7 @@
         <i data-lucide="flame" style="color: var(--triage-red); width: 32px; height: 32px;"></i>
       </div>
       
-      <!-- Green (Right Top) -->
+      <!-- Column 3 Top: Green (Minor) -->
       <div class="glass-card stat-card green">
         <div class="stat-info">
           <h3>🟢 輕傷 (Minor)</h3>
@@ -90,8 +88,45 @@
         </div>
         <i data-lucide="user-check" style="color: var(--triage-green); width: 32px; height: 32px;"></i>
       </div>
+
+      <!-- Column 1 Bottom: Real-time Location Stats -->
+      <div class="glass-card stat-card total" style="display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; padding: 12px 16px;">
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <h3 style="font-size: 12px; display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 700; color: var(--text-main);"><i data-lucide="pie-chart" style="color:var(--primary); width:13px; height:13px;"></i> 即時位置統計</h3>
+          <strong id="locStatPercent" style="color:var(--primary); font-size:11.5px; font-weight:700;">0%</strong>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: center; width: 100%;">
+          <!-- Triage Area Card -->
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; width: 100%;">
+            <span style="display:inline-flex; align-items:center; gap:4px; color: var(--text-muted);"><span style="width: 5px; height: 5px; background: #f59e0b; border-radius: 50%;"></span>檢傷區</span>
+            <strong id="locStatTriage" style="color: #f59e0b; font-weight: 700;">0人</strong>
+          </div>
+
+          <!-- Treatment Area Card -->
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; width: 100%;">
+            <span style="display:inline-flex; align-items:center; gap:4px; color: var(--text-muted);"><span style="width: 5px; height: 5px; background: #10b981; border-radius: 50%;"></span>治療區</span>
+            <strong id="locStatTreatment" style="color: #10b981; font-weight: 700;">0人</strong>
+          </div>
+
+          <!-- Transported Card -->
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; width: 100%;">
+            <span style="display:inline-flex; align-items:center; gap:4px; color: var(--text-muted);"><span style="width: 5px; height: 5px; background: #3b82f6; border-radius: 50%;"></span>已送醫</span>
+            <strong id="locStatTransport" style="color: #3b82f6; font-weight: 700;">0人</strong>
+          </div>
+        </div>
+        
+        <!-- Location Progress visual overlay -->
+        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); width: 100%;">
+          <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.05); border-radius: 2.5px; overflow: hidden; display: flex;">
+            <div id="barTriage" style="width: 0%; height: 100%; background: #f59e0b; transition: width 0.3s ease;"></div>
+            <div id="barTreatment" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
+            <div id="barTransport" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+      </div>
       
-      <!-- Yellow (Middle Bottom) -->
+      <!-- Column 2 Bottom: Yellow (Delayed) -->
       <div class="glass-card stat-card yellow">
         <div class="stat-info">
           <h3>🟡 延遲治療 (Delayed)</h3>
@@ -100,7 +135,7 @@
         <i data-lucide="alert-triangle" style="color: var(--triage-yellow); width: 32px; height: 32px;"></i>
       </div>
       
-      <!-- Black (Right Bottom) -->
+      <!-- Column 3 Bottom: Black (Deceased) -->
       <div class="glass-card stat-card black">
         <div class="stat-info">
           <h3>⚫ 死亡/期待 (Deceased)</h3>
@@ -108,59 +143,7 @@
         </div>
         <i data-lucide="skull" style="color: var(--triage-black); width: 32px; height: 32px;"></i>
       </div>
-      
-      <!-- Real-time Location Stats (Far Right Column - Spans 2 Rows) -->
-      <div class="glass-card stat-card total" style="grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; height: 100%; border-left-color: var(--primary); padding: 16px 20px;">
-        <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
-          <h3 style="font-size: 13px; display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 700; color: var(--text-main);"><i data-lucide="pie-chart" style="color:var(--primary); width:15px; height:15px;"></i> 即時位置統計</h3>
-          <strong id="locStatPercent" style="color:var(--primary); font-size:12.5px; font-weight:700;">0%</strong>
-        </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: center; width: 100%;">
-          <!-- Triage Area Card -->
-          <div style="background: rgba(245, 158, 11, 0.04); border: 1px solid rgba(245, 158, 11, 0.1); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
-                <span style="width: 6px; height: 6px; background: #f59e0b; border-radius: 50%;"></span>
-                <span>檢傷區</span>
-              </div>
-              <div style="font-size: 10px; color: var(--text-muted);">剛評估未填病歷</div>
-            </div>
-            <div style="font-size: 22px; font-weight: 800; color: #f59e0b; line-height: 1;" id="locStatTriage">0人</div>
-          </div>
-
-          <!-- Treatment Area Card -->
-          <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.1); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
-                <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span>
-                <span>治療區</span>
-              </div>
-              <div style="font-size: 10px; color: var(--text-muted);">治療中已登錄病歷</div>
-            </div>
-            <div style="font-size: 22px; font-weight: 800; color: #10b981; line-height: 1;" id="locStatTreatment">0人</div>
-          </div>
-
-          <!-- Transported Card -->
-          <div style="background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.1); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #3b82f6; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
-                <span style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%;"></span>
-                <span>已送醫</span>
-              </div>
-              <div style="font-size: 10px; color: var(--text-muted);">完成後送已離場</div>
-            </div>
-            <div style="font-size: 22px; font-weight: 800; color: #3b82f6; line-height: 1;" id="locStatTransport">0人</div>
-          </div>
-        </div>
-        
-        <!-- Location Progress visual overlay -->
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); width: 100%;">
-          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <span>現場處置與送醫率</span>
-          </div>
-          <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; display: flex;">
-            <div id="barTriage" style="width: 0%; height: 100%; background: #f59e0b; transition: width 0.3s ease;"></div>
+    </div>" style="width: 0%; height: 100%; background: #f59e0b; transition: width 0.3s ease;"></div>
             <div id="barTreatment" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
             <div id="barTransport" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s ease;"></div>
           </div>
