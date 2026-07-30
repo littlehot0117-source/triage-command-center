@@ -720,6 +720,7 @@ tr:hover td {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
 }
