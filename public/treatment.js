@@ -313,9 +313,9 @@ function renderPatientsList() {
           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; min-width:90px;">
             <span class="triage-badge ${p.triageLevel}" style="font-size:10px; padding:3px 8px;">${getTriageLabel(p.triageLevel)}</span>
             <div style="font-size:10px; color:var(--text-muted); margin-top:6px;">${timeStr}</div>
-            <div class="countdown-timer" data-patient-id="${p.id}" style="font-size:11px; font-weight:700; color:var(--triage-yellow); margin-top:6px; display:flex; align-items:center; gap:4px;">
+            <div class="countdown-timer" data-patient-id="${p.id}" style="font-size:11px; font-weight:700; color:var(--triage-yellow); margin-top:6px; display:${p.triageLevel === 'black' ? 'none' : 'flex'}; align-items:center; gap:4px;">
               <i data-lucide="clock" style="width:12px; height:12px;"></i>
-              <span class="timer-countdown-text">05:00</span>
+              <span class="timer-countdown-text">${p.triageLevel === 'green' ? '20:00' : (p.triageLevel === 'yellow' ? '15:00' : '10:00')}</span>
             </div>
           </div>
         </div>
@@ -1215,27 +1215,47 @@ function startCountdownTimer() {
     if (!systemState.patients) return;
     
     const now = Date.now();
-    const limitMs = 5 * 60 * 1000; // 5 minutes in milliseconds
     
     systemState.patients.forEach(p => {
       if (p.treatmentInfo && p.treatmentInfo.assessmentStatus === 'assessed') {
+        const level = p.triageLevel;
+        
+        // Black patients do not count down and their timers should be hidden
+        if (level === 'black') {
+          const timerEl = document.querySelector(`.countdown-timer[data-patient-id="${p.id}"]`);
+          if (timerEl) {
+            timerEl.style.display = 'none';
+          }
+          return;
+        }
+        
+        // Calculate limit: green = 20m, yellow = 15m, red = 10m
+        let limitMs = 10 * 60 * 1000;
+        if (level === 'green') limitMs = 20 * 60 * 1000;
+        else if (level === 'yellow') limitMs = 15 * 60 * 1000;
+        
         const completedAt = p.treatmentInfo.assessmentCompletedAt || now;
         const elapsed = now - completedAt;
         const remaining = Math.max(0, limitMs - elapsed);
         
         // Update UI if element is visible
-        const timerEl = document.querySelector(`.countdown-timer[data-patient-id="${p.id}"] .timer-countdown-text`);
+        const timerEl = document.querySelector(`.countdown-timer[data-patient-id="${p.id}"]`);
         if (timerEl) {
-          const totalSec = Math.ceil(remaining / 1000);
-          const mins = Math.floor(totalSec / 60);
-          const secs = totalSec % 60;
-          timerEl.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-          
-          if (totalSec < 60) {
-            timerEl.parentElement.style.color = 'var(--triage-red)';
-            timerEl.parentElement.style.fontWeight = '800';
-          } else {
-            timerEl.parentElement.style.color = 'var(--triage-yellow)';
+          timerEl.style.display = 'flex';
+          const timerTextEl = timerEl.querySelector('.timer-countdown-text');
+          if (timerTextEl) {
+            const totalSec = Math.ceil(remaining / 1000);
+            const mins = Math.floor(totalSec / 60);
+            const secs = totalSec % 60;
+            timerTextEl.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            
+            if (totalSec < 60) {
+              timerEl.style.color = 'var(--triage-red)';
+              timerEl.style.fontWeight = '800';
+            } else {
+              timerEl.style.color = 'var(--triage-yellow)';
+              timerEl.style.fontWeight = '700';
+            }
           }
         }
         
