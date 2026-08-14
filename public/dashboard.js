@@ -172,25 +172,30 @@ function handleLocalAction(type, data) {
       break;
 
     case 'TRANSPORT_PATIENT':
-      const patient = state.patients.find(p => p.id === data.patientId);
-      const vehicle = state.vehicles.find(v => v.id === data.vehicleId);
-      const hospital = state.hospitals.find(h => h.id === data.hospitalId);
+      const tIds = data.patientIds || (data.patientId ? [data.patientId] : []);
+      const veh = state.vehicles.find(v => v.id === data.vehicleId);
+      const hosp = state.hospitals.find(h => h.id === data.hospitalId);
 
-      if (patient && vehicle && hospital) {
+      if (tIds.length > 0 && veh && hosp) {
         const timeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-        patient.status = 'transported';
-        patient.transportInfo = {
-          vehicleName: vehicle.name,
-          hospitalName: hospital.name,
-          time: timeStr
-        };
+        tIds.forEach(pId => {
+          const pat = state.patients.find(p => p.id === pId);
+          if (pat) {
+            pat.status = 'transported';
+            pat.transportInfo = {
+              vehicleName: veh.name,
+              hospitalName: hosp.name,
+              time: timeStr
+            };
+            hosp.receivedCount += 1;
+          }
+        });
 
-        vehicle.status = 'transporting';
-        vehicle.hospitalName = hospital.name;
-        vehicle.patientId = data.patientId;
-        vehicle.timestamp = new Date().toISOString();
-
-        hospital.receivedCount += 1;
+        veh.status = 'transporting';
+        veh.hospitalName = hosp.name;
+        veh.patientId = tIds.join(', ');
+        veh.patientIds = tIds;
+        veh.timestamp = new Date().toISOString();
       }
       break;
 
@@ -210,6 +215,7 @@ function handleLocalAction(type, data) {
         v.status = 'standby';
         v.hospitalName = null;
         v.patientId = null;
+        v.patientIds = null;
         v.timestamp = null;
         v.transportCount = (v.transportCount || 0) + 1;
       }
@@ -821,6 +827,27 @@ function openTransportModal(patientId) {
     <span style="margin-left:8px;">${p.id}</span>
   `;
 
+  // Render other waiting patients as checkable list to transport together
+  const otherPatientsContainer = document.getElementById('modalOtherPatientsContainer');
+  if (otherPatientsContainer) {
+    const otherWaiting = state.patients.filter(pat => pat.id !== patientId && pat.status === 'waiting');
+    if (otherWaiting.length === 0) {
+      otherPatientsContainer.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">無其他待送醫傷患</span>`;
+    } else {
+      otherPatientsContainer.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:4px; max-height:100px; overflow-y:auto; padding:6px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:rgba(0,0,0,0.2);">
+          ${otherWaiting.map(pat => `
+            <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; user-select:none; margin:2px 0;">
+              <input type="checkbox" name="modalOtherPatient" value="${pat.id}" style="margin:0; cursor:pointer;">
+              <span class="triage-badge ${pat.triageLevel}" style="font-size:10px; padding:2px 6px; border-radius:3px;">${getTriageZh(pat.triageLevel)}</span>
+              <span style="font-weight:600;">${pat.id}</span>
+            </label>
+          `).join('')}
+        </div>
+      `;
+    }
+  }
+
   // Render standby vehicles
   const vehicleSelect = document.getElementById('modalVehicleSelect');
   const standbyVehicles = state.vehicles.filter(v => v.status === 'standby');
@@ -912,7 +939,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    sendAction('TRANSPORT_PATIENT', { patientId, vehicleId, hospitalId });
+    // Collect all checked patient checkboxes
+    const checkedBoxes = document.querySelectorAll('input[name="modalOtherPatient"]:checked');
+    const patientIds = [patientId];
+    checkedBoxes.forEach(box => {
+      patientIds.push(box.value);
+    });
+
+    sendAction('TRANSPORT_PATIENT', { patientIds, vehicleId, hospitalId });
     closeTransportModal();
   });
 });

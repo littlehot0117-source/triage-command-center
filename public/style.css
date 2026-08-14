@@ -1094,4 +1094,56 @@ tr:hover td {
   color: var(--text-main);
 }
 
+/* Secondary Triage Override Button styling & highlight enhancement */
+.assess-triage-btn {
+  opacity: 0.35 !important;
+  filter: saturate(0.4) grayscale(0.2) !important;
+  background: rgba(30, 41, 59, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-muted) !important;
+  transform: scale(0.95);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.assess-triage-btn.red { border-color: rgba(239, 68, 68, 0.25) !important; color: rgba(239, 68, 68, 0.7) !important; }
+.assess-triage-btn.yellow { border-color: rgba(245, 158, 11, 0.25) !important; color: rgba(245, 158, 11, 0.7) !important; }
+.assess-triage-btn.green { border-color: rgba(16, 185, 129, 0.25) !important; color: rgba(16, 185, 129, 0.7) !important; }
+.assess-triage-btn.black { border-color: rgba(100, 116, 139, 0.25) !important; color: rgba(100, 116, 139, 0.7) !important; }
+
+/* Active States */
+.assess-triage-btn.active {
+  opacity: 1 !important;
+  filter: saturate(1) grayscale(0) !important;
+  transform: scale(1.08) !important;
+  font-weight: 900 !important;
+}
+
+.assess-triage-btn.red.active {
+  background: var(--triage-red-gradient) !important;
+  border-color: #ef4444 !important;
+  color: white !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+}
+
+.assess-triage-btn.yellow.active {
+  background: var(--triage-yellow-gradient) !important;
+  border-color: #f59e0b !important;
+  color: black !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6) !important;
+}
+
+.assess-triage-btn.green.active {
+  background: var(--triage-green-gradient) !important;
+  border-color: #10b981 !important;
+  color: white !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6) !important;
+}
+
+.assess-triage-btn.black.active {
+  background: var(--triage-black-gradient) !important;
+  border-color: #475569 !important;
+  color: white !important;
+  box-shadow: 0 0 16px rgba(15, 23, 42, 0.8) !important;
+}
+
 

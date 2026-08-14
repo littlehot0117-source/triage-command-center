@@ -802,9 +802,20 @@ function renderInjuredPartsNotes() {
   container.innerHTML = activeParts.map(part => {
     const existingNote = injuredPartsNotes[part] || '';
     return `
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:12px; font-weight:700; color:#ef4444; width:65px; text-align:right; white-space:nowrap;">${part}：</span>
-        <input type="text" class="input-control" value="${existingNote}" placeholder="輸入受傷情形 (如：撕裂傷、擦傷)" style="flex:1; font-size:12px; height:28px; padding:2px 8px;" oninput="updatePartNote('${part}', this.value)">
+      <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; font-weight:700; color:#ef4444; width:65px; text-align:right; white-space:nowrap;">${part}：</span>
+          <input type="text" id="part-note-${part}" class="input-control" value="${existingNote}" placeholder="輸入受傷情形 (如：撕裂傷、擦傷)" style="flex:1; font-size:12px; height:28px; padding:2px 8px;" oninput="updatePartNote('${part}', this.value)">
+        </div>
+        <div style="margin-left:73px; display:flex; flex-wrap:wrap; gap:4px;">
+          ${['骨折', '撕裂傷', '擦傷', '挫傷', '扭傷', '穿刺傷', '燒燙傷', '紅腫'].map(type => {
+            const hasType = existingNote.includes(type);
+            const activeStyle = hasType ? 'background: rgba(239, 68, 68, 0.25); border-color: #ef4444; color: white;' : '';
+            return `
+              <button type="button" class="btn btn-secondary" style="padding:2px 6px; font-size:10px; height:20px; line-height:1; cursor:pointer; ${activeStyle}" onclick="toggleInjuryTypeKeyword('${part}', '${type}')">${type}</button>
+            `;
+          }).join('')}
+        </div>
       </div>
     `;
   }).join('');
@@ -812,6 +823,21 @@ function renderInjuredPartsNotes() {
 
 function updatePartNote(part, value) {
   injuredPartsNotes[part] = value;
+}
+
+function toggleInjuryTypeKeyword(part, type) {
+  let currentNote = injuredPartsNotes[part] || '';
+  let parts = currentNote.split(/[,\s，、]+/).map(p => p.trim()).filter(p => p !== '');
+  
+  const index = parts.indexOf(type);
+  if (index !== -1) {
+    parts.splice(index, 1);
+  } else {
+    parts.push(type);
+  }
+  
+  injuredPartsNotes[part] = parts.join(', ');
+  renderInjuredPartsNotes();
 }
 
 // Vital Signs warnings
@@ -872,9 +898,6 @@ function setAssessTriage(color) {
   const btns = document.querySelectorAll('.assess-triage-btn');
   btns.forEach(btn => {
     btn.classList.remove('active');
-    btn.style.transform = 'scale(1)';
-    btn.style.border = '1px solid rgba(255,255,255,0.05)';
-    btn.style.boxShadow = 'none';
   });
   
   let activeBtn = null;
@@ -885,9 +908,6 @@ function setAssessTriage(color) {
   
   if (activeBtn) {
     activeBtn.classList.add('active');
-    activeBtn.style.transform = 'scale(1.03)';
-    activeBtn.style.boxShadow = `0 0 12px var(--triage-${color})`;
-    activeBtn.style.border = `2px solid var(--triage-${color === 'black' ? 'slate' : color})`;
   }
 }
 

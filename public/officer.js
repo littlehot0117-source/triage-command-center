@@ -70,11 +70,21 @@ function initConnection() {
       const message = JSON.parse(event.data);
       if (message.type === 'init' || message.type === 'STATE_UPDATE') {
         systemState = message.data;
-        updateIncidentName();
-        const historyPage = document.getElementById('pageHistory');
-        if (historyPage && historyPage.style.display === 'block') {
-          renderHistory();
+
+        // Check if a new case has started to clear local history
+        const currentCase = systemState.currentCase;
+        if (currentCase && currentCase.status === 'active' && currentCase.startTime) {
+          const lastStart = localStorage.getItem('last_case_start_time');
+          if (lastStart !== currentCase.startTime) {
+            clearLocalTriageHistory();
+            localStorage.setItem('last_case_start_time', currentCase.startTime);
+          }
+        } else if (currentCase && currentCase.status === 'idle') {
+          localStorage.removeItem('last_case_start_time');
         }
+
+        updateIncidentName();
+        renderHistory();
       }
     } catch (err) {
       console.error('[Officer WS] Error:', err);
@@ -639,6 +649,23 @@ function getTriageLabel(color) {
     case 'green': return '輕傷';
     case 'black': return '死亡';
     default: return '未知';
+  }
+}
+
+function clearLocalTriageHistory() {
+  try {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('triage_history_') || key.startsWith('triage_counter_'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    resetForm();
+    console.log('[Backup Cleanup] All officer local triage history and counters cleared.');
+  } catch (e) {
+    console.error('Error clearing local triage history:', e);
   }
 }
 

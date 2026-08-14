@@ -165,23 +165,23 @@
                 <!-- Pelvis -->
                 <polygon id="mq-Pelvis" class="mq-part" points="35,98 65,98 61,114 39,114" onclick="toggleInjuredPart('骨盆(前)')" title="骨盆(前)"></polygon>
                 
-                <!-- Left Upper Limb parts -->
-                <rect id="mq-Larm-upper" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂(前)')" title="左上臂(前)"></rect>
-                <rect id="mq-Larm-fore" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂(前)')" title="左前臂(前)"></rect>
-                <circle id="mq-Lhand" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手(前)')" title="左手(前)"></circle>
+                <!-- Right Upper Limb parts (drawn on viewer's Left, x=14) -->
+                <rect id="mq-Rarm-upper" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂(前)')" title="右上臂(前)"></rect>
+                <rect id="mq-Rarm-fore" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂(前)')" title="右前臂(前)"></rect>
+                <circle id="mq-Rhand" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('右手(前)')" title="右手(前)"></circle>
                 
-                <!-- Right Upper Limb parts -->
-                <rect id="mq-Rarm-upper" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂(前)')" title="右上臂(前)"></rect>
-                <rect id="mq-Rarm-fore" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂(前)')" title="右前臂(前)"></rect>
-                <circle id="mq-Rhand" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手(前)')" title="右手(前)"></circle>
+                <!-- Left Upper Limb parts (drawn on viewer's Right, x=70) -->
+                <rect id="mq-Larm-upper" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂(前)')" title="左上臂(前)"></rect>
+                <rect id="mq-Larm-fore" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂(前)')" title="左前臂(前)"></rect>
+                <circle id="mq-Lhand" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('左手(前)')" title="左手(前)"></circle>
                 
-                <!-- Left Lower Limb parts -->
-                <rect id="mq-Lleg-thigh" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿(前)')" title="左大腿(前)"></rect>
-                <rect id="mq-Lleg-shin" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿(前)')" title="左小腿(前)"></rect>
+                <!-- Right Lower Limb parts (drawn on viewer's Left, x=34) -->
+                <rect id="mq-Rleg-thigh" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿(前)')" title="右大腿(前)"></rect>
+                <rect id="mq-Rleg-shin" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿(前)')" title="右小腿(前)"></rect>
                 
-                <!-- Right Lower Limb parts -->
-                <rect id="mq-Rleg-thigh" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿(前)')" title="右大腿(前)"></rect>
-                <rect id="mq-Rleg-shin" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿(前)')" title="右小腿(前)"></rect>
+                <!-- Left Lower Limb parts (drawn on viewer's Right, x=52) -->
+                <rect id="mq-Lleg-thigh" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿(前)')" title="左大腿(前)"></rect>
+                <rect id="mq-Lleg-shin" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿(前)')" title="左小腿(前)"></rect>
               </svg>
             </div>
 
@@ -277,11 +277,11 @@
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessSpo2">血氧 SpO2 (%)</label>
-              <input type="number" id="assessSpo2" class="input-control vitals-input" placeholder="正常 &ge; 95%" min="10" max="100" oninput="validateVital('spo2')">
+              <input type="number" id="assessSpo2" class="input-control vitals-input" placeholder="" min="10" max="100" oninput="validateVital('spo2')">
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessTemp">體溫 (°C)</label>
-              <input type="number" step="0.1" id="assessTemp" class="input-control vitals-input" placeholder="正常 36-37.5" min="25" max="45" oninput="validateVital('temp')">
+              <input type="number" step="0.1" id="assessTemp" class="input-control vitals-input" placeholder="" min="25" max="45" oninput="validateVital('temp')">
             </div>
           </div>
 
@@ -289,11 +289,11 @@
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessBpSys">收縮壓 (mmHg)</label>
-              <input type="number" id="assessBpSys" class="input-control vitals-input" placeholder="正常 90-140" min="20" max="300" oninput="validateVital('bpsys')">
+              <input type="number" id="assessBpSys" class="input-control vitals-input" placeholder="" min="20" max="300" oninput="validateVital('bpsys')">
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessBpDia">舒張壓 (mmHg)</label>
-              <input type="number" id="assessBpDia" class="input-control" placeholder="正常 60-90" min="10" max="200">
+              <input type="number" id="assessBpDia" class="input-control" placeholder="" min="10" max="200">
             </div>
           </div>
 
@@ -301,11 +301,11 @@
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessHr">心跳/脈搏 (bpm)</label>
-              <input type="number" id="assessHr" class="input-control vitals-input" placeholder="正常 60-100" min="10" max="250" oninput="validateVital('hr')">
+              <input type="number" id="assessHr" class="input-control vitals-input" placeholder="" min="10" max="250" oninput="validateVital('hr')">
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="assessRr">呼吸頻率 (bpm)</label>
-              <input type="number" id="assessRr" class="input-control vitals-input" placeholder="正常 12-20" min="0" max="80" oninput="validateVital('rr')">
+              <input type="number" id="assessRr" class="input-control vitals-input" placeholder="" min="0" max="80" oninput="validateVital('rr')">
             </div>
           </div>
 
