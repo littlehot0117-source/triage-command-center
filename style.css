@@ -1,0 +1,1149 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Colors */
+  --bg-dark: #090d16;
+  --bg-card: rgba(17, 25, 40, 0.75);
+  --bg-card-hover: rgba(26, 37, 58, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  --primary: #3b82f6;
+  --primary-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  --accent: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  
+  /* Theme elements adjustments */
+  --input-bg: rgba(0, 0, 0, 0.3);
+  --modal-bg: #111827;
+  --th-bg: #111928;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+  --btn-secondary-color: var(--text-muted);
+  --bg-grad-1: rgba(29, 78, 216, 0.15);
+  --bg-grad-2: rgba(139, 92, 246, 0.15);
+  --item-bg: rgba(255, 255, 255, 0.02);
+  --gcs-slider-track: rgba(255, 255, 255, 0.1);
+  --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --card-hover-border: rgba(255, 255, 255, 0.15);
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --card-hover-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+  --mannequin-fill: rgba(255, 255, 255, 0.06);
+  --mannequin-stroke: rgba(255, 255, 255, 0.35);
+
+
+  
+  /* Triage Colors */
+  --triage-red: #f43f5e;
+  --triage-red-gradient: linear-gradient(135deg, #f43f5e, #be123c);
+  --triage-red-glow: rgba(244, 63, 94, 0.4);
+  
+  --triage-yellow: #eab308;
+  --triage-yellow-gradient: linear-gradient(135deg, #eab308, #a16207);
+  --triage-yellow-glow: rgba(234, 179, 8, 0.4);
+  
+  --triage-green: #10b981;
+  --triage-green-gradient: linear-gradient(135deg, #10b981, #047857);
+  --triage-green-glow: rgba(16, 185, 129, 0.4);
+  
+  --triage-black: #475569;
+  --triage-black-gradient: linear-gradient(135deg, #475569, #1e293b);
+  --triage-black-glow: rgba(71, 85, 105, 0.4);
+  
+  /* Status Colors */
+  --status-waiting: #f59e0b;
+  --status-transported: #10b981;
+  
+  /* Fonts */
+  --font-title: 'Outfit', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  /* Radius & Shadows */
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-blur: blur(12px);
+}
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(29, 78, 216, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Glassmorphism Card base */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: var(--card-hover-border);
+  box-shadow: var(--card-hover-shadow);
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(9, 13, 22, 0.5);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-title-container h1 {
+  font-size: 24px;
+  background: linear-gradient(135deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.badge-live {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 4px 8px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: pulse-red 2s infinite;
+}
+
+/* Buttons */
+.btn {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-color);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: var(--btn-secondary-bg);
+  filter: brightness(1.15);
+  box-shadow: none;
+}
+
+.btn-danger {
+  background: var(--triage-red-gradient);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.4);
+}
+
+/* Forms & Inputs */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.input-control {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.input-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+/* Animations */
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    opacity: 0.8;
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    opacity: 1;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-triage-red {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 var(--triage-red-glow); }
+  50% { transform: scale(1.03); box-shadow: 0 0 12px 4px var(--triage-red-glow); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 var(--triage-red-glow); }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Triage Badges & Cards */
+.triage-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.triage-badge.red {
+  background: var(--triage-red-gradient);
+  color: white;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+}
+
+.triage-badge.yellow {
+  background: var(--triage-yellow-gradient);
+  color: white;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
+}
+
+.triage-badge.green {
+  background: var(--triage-green-gradient);
+  color: white;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.triage-badge.black {
+  background: var(--triage-black-gradient);
+  color: white;
+  box-shadow: 0 0 10px rgba(71, 85, 105, 0.3);
+}
+
+/* ======================================================== */
+/* DASHBOARD LAYOUT (index.html) */
+/* ======================================================== */
+
+.dashboard-container {
+  padding: 30px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Case Setup Overlay */
+.setup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.85);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.setup-card {
+  max-width: 480px;
+  width: 90%;
+  animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.setup-card h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.setup-card p {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* Stats Summary Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 5px solid transparent;
+  padding: 18px 20px;
+}
+
+.stat-card.red { 
+  background: var(--triage-red-gradient) !important;
+  border-left-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+.stat-card.red h3, .stat-card.red .stat-value, .stat-card.red i, .stat-card.red svg {
+  color: #ffffff !important;
+}
+
+.stat-card.yellow { 
+  background: var(--triage-yellow-gradient) !important;
+  border-left-color: rgba(0, 0, 0, 0.3);
+  color: #000000;
+}
+.stat-card.yellow h3, .stat-card.yellow .stat-value, .stat-card.yellow i, .stat-card.yellow svg {
+  color: #000000 !important;
+}
+
+.stat-card.green { 
+  background: var(--triage-green-gradient) !important;
+  border-left-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+.stat-card.green h3, .stat-card.green .stat-value, .stat-card.green i, .stat-card.green svg {
+  color: #ffffff !important;
+}
+
+.stat-card.black { 
+  background: var(--triage-black-gradient) !important;
+  border-left-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+.stat-card.black h3, .stat-card.black .stat-value, .stat-card.black i, .stat-card.black svg {
+  color: #ffffff !important;
+}
+.stat-card.total { 
+  border-left-color: var(--primary); 
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 12px;
+  }
+  .stat-card.total {
+    grid-row: auto;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.stat-info h3 {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 800;
+  font-family: var(--font-title);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 8px;
+}
+
+/* Vehicle & Hospital lists */
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: var(--radius-sm);
+}
+
+.vehicle-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-block;
+  text-align: center;
+  line-height: 1.3;
+}
+.vehicle-status.standby { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.vehicle-status.transporting { background: rgba(239, 68, 68, 0.15); color: #f43f5e; }
+.vehicle-status.returning { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+
+.hospital-capacity-bar {
+  width: 100px;
+  background: rgba(255,255,255,0.1);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.hospital-capacity-fill {
+  height: 100%;
+  background: var(--primary-gradient);
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+/* Patient Tables */
+.table-container {
+  overflow: auto;
+  max-height: 450px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+  background: var(--th-bg);
+  z-index: 10;
+  box-shadow: inset 0 -1px 0 var(--border-color);
+}
+
+tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Patient Row Colors for visual triage matching */
+.patient-row-red {
+  border-left: 4px solid var(--triage-red);
+}
+.patient-row-yellow {
+  border-left: 4px solid var(--triage-yellow);
+}
+.patient-row-green {
+  border-left: 4px solid var(--triage-green);
+}
+.patient-row-black {
+  border-left: 4px solid var(--triage-black);
+}
+
+/* QR Code Section */
+.qr-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.qr-code {
+  width: 120px;
+  height: 120px;
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.qr-info p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.qr-info code {
+  background: rgba(0,0,0,0.4);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--primary);
+  word-break: break-all;
+}
+
+/* Chart Canvas Sizing */
+.chart-box {
+  position: relative;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Config Grid */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+@media (max-width: 768px) {
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modal Popup */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 500px;
+  background: var(--modal-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 24px;
+  transform: translateY(-20px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  font-size: 20px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 8px;
+}
+
+.modal-body {
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ======================================================== */
+/* MOBILE TRIAGE OFFICER LAYOUT (officer.html) */
+/* ======================================================== */
+
+.officer-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Login Panel */
+.login-card {
+  max-width: 400px;
+  margin: 100px auto 0;
+  text-align: center;
+}
+
+.login-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.login-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-title);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  transform: scale(1.05);
+}
+
+/* Active Triage UI */
+.officer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Big Grid Direct Colors */
+.direct-triage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.triage-color-btn {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 24px 16px;
+  color: white;
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.triage-color-btn:active {
+  transform: scale(0.95);
+}
+
+.triage-color-btn.red { background: var(--triage-red-gradient); }
+.triage-color-btn.yellow { background: var(--triage-yellow-gradient); color: #000; }
+.triage-color-btn.green { background: var(--triage-green-gradient); }
+.triage-color-btn.black { background: var(--triage-black-gradient); }
+
+.triage-color-btn.red:hover { box-shadow: 0 0 16px var(--triage-red); }
+.triage-color-btn.yellow:hover { box-shadow: 0 0 16px var(--triage-yellow); }
+.triage-color-btn.green:hover { box-shadow: 0 0 16px var(--triage-green); }
+.triage-color-btn.black:hover { box-shadow: 0 0 16px var(--triage-black); }
+
+/* START Wizard Flow */
+.wizard-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.wizard-step {
+  display: none;
+  animation: slideInUp 0.3s ease;
+}
+
+.wizard-step.active {
+  display: block;
+}
+
+.wizard-question {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.wizard-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.wizard-btn {
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wizard-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.wizard-btn.primary {
+  background: var(--primary-gradient);
+  border-color: transparent;
+}
+
+/* History lists in mobile */
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(0,0,0,0.15);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--triage-black);
+  margin-bottom: 8px;
+}
+
+.history-item.red { border-left-color: var(--triage-red); }
+.history-item.yellow { border-left-color: var(--triage-yellow); }
+.history-item.green { border-left-color: var(--triage-green); }
+.history-item.black { border-left-color: var(--triage-black); }
+
+/* Utility classes */
+.pulse {
+  animation: pulse-triage-red 2.5s infinite ease-in-out;
+}
+
+.badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  font-size: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+.badge-count.red { background: var(--triage-red); }
+.badge-count.yellow { background: var(--triage-yellow); color: black; }
+.badge-count.green { background: var(--triage-green); }
+.badge-count.black { background: var(--triage-black); }
+
+/* APP MODE & PWA BOTTOM NAV */
+.app-body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 80px; /* Space for bottom nav */
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(15, 23, 42, 0.95);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 900;
+}
+
+.bottom-nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  height: 100%;
+}
+
+.bottom-nav-btn.active {
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.bottom-nav-btn i {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.bottom-nav-btn.active i {
+  transform: scale(1.15);
+  color: var(--primary);
+}
+
+/* CHIAYI COUNTY FIRE STATION VEHICLE CONFIG PANEL */
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 140px;
+  overflow-y: auto;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.station-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.station-btn:hover {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
+.station-btn:active {
+  transform: scale(0.95);
+}
+
+.station-btn.hidden {
+  display: none;
+}
+
+/* 4-column Hospital Grid layout */
+.hospital-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 4px;
+}
+
+.hospital-grid .item-row {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  min-height: 100px;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .hospital-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hospital-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 3-column Vehicle Grid layout */
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+@media (max-width: 1024px) {
+  .vehicle-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .vehicle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Touch-friendly Toggle Button Group */
+.toggle-btn-group {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.toggle-btn-group button.btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 10px 0;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn-group button.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: none;
+  box-shadow: none;
+}
+
+.toggle-btn-group button.btn.active {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+/* Dispatched station button style */
+.station-btn.station-btn-dispatched {
+  background: var(--primary-gradient) !important;
+  border-color: transparent !important;
+  color: white !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Interactive Hospital Card styling */
+.hospital-card {
+  transition: all 0.2s ease;
+}
+
+.hospital-card:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Treatment Area custom button checkboxes */
+.part-checkbox-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 12px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.part-checkbox-btn.active {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+  color: white !important;
+}
+
+.part-checkbox-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+/* Secondary Triage Override Button styling & highlight enhancement */
+.assess-triage-btn {
+  opacity: 0.35 !important;
+  filter: saturate(0.4) grayscale(0.2) !important;
+  background: rgba(30, 41, 59, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-muted) !important;
+  transform: scale(0.95);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.assess-triage-btn.red { border-color: rgba(239, 68, 68, 0.25) !important; color: rgba(239, 68, 68, 0.7) !important; }
+.assess-triage-btn.yellow { border-color: rgba(245, 158, 11, 0.25) !important; color: rgba(245, 158, 11, 0.7) !important; }
+.assess-triage-btn.green { border-color: rgba(16, 185, 129, 0.25) !important; color: rgba(16, 185, 129, 0.7) !important; }
+.assess-triage-btn.black { border-color: rgba(100, 116, 139, 0.25) !important; color: rgba(100, 116, 139, 0.7) !important; }
+
+/* Active States */
+.assess-triage-btn.active {
+  opacity: 1 !important;
+  filter: saturate(1) grayscale(0) !important;
+  transform: scale(1.08) !important;
+  font-weight: 900 !important;
+}
+
+.assess-triage-btn.red.active {
+  background: var(--triage-red-gradient) !important;
+  border-color: #ef4444 !important;
+  color: white !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+}
+
+.assess-triage-btn.yellow.active {
+  background: var(--triage-yellow-gradient) !important;
+  border-color: #f59e0b !important;
+  color: black !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6) !important;
+}
+
+.assess-triage-btn.green.active {
+  background: var(--triage-green-gradient) !important;
+  border-color: #10b981 !important;
+  color: white !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6) !important;
+}
+
+.assess-triage-btn.black.active {
+  background: var(--triage-black-gradient) !important;
+  border-color: #475569 !important;
+  color: white !important;
+  box-shadow: 0 0 16px rgba(15, 23, 42, 0.8) !important;
+}
+
+

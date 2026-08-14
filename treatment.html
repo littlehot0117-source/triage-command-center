@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>大傷治療區臨床系統 - MCI Treatment Area</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <!-- Google Fonts: Outfit and Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+  <div class="officer-container">
+    <!-- Header -->
+    <header class="officer-header" style="border-bottom: 2px solid rgba(16, 185, 129, 0.2);">
+      <div style="text-align: left;">
+        <h1 style="font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #10b981; margin: 0;">
+          <i data-lucide="activity"></i> 治療區評估系統
+        </h1>
+        <div id="incidentDisplay" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">載入事件中...</div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div id="connectionStatusDot" class="status-dot offline" style="width:8px; height:8px;"></div>
+          <span id="connectionStatusText" style="font-size: 10px; color: var(--text-muted);">離線模式</span>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button onclick="openLocationMap()" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; height: 26px; border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; border-radius: 4px; outline: none; transition: all 0.2s;">
+            <i data-lucide="map" style="width:12px; height:12px;"></i> 定位地圖
+          </button>
+          <a href="officer.html" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px; height: 26px; border-color: var(--border-color); display: flex; align-items: center; gap: 4px; text-decoration: none;">
+            <i data-lucide="arrow-left" style="width:12px; height:12px;"></i> 返回檢傷 App
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Tab Switcher -->
+    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+      <button id="tabWaiting" class="btn" style="flex: 1; font-size: 13px; padding: 10px 8px;" onclick="switchTab('waiting')">
+        <i data-lucide="clock" style="width:14px; height:14px;"></i> 待評估 (<span id="waitingCount">0</span>)
+      </button>
+      <button id="tabAssessed" class="btn btn-secondary" style="flex: 1; font-size: 13px; padding: 10px 8px;" onclick="switchTab('assessed')">
+        <i data-lucide="file-check" style="width:14px; height:14px;"></i> 已評估 (<span id="assessedCount">0</span>)
+      </button>
+    </div>
+
+    <!-- Search input -->
+    <div class="form-group" style="margin-bottom: 16px;">
+      <div style="position: relative; display: flex; align-items: center;">
+        <i data-lucide="search" style="position: absolute; left: 12px; width: 16px; height: 16px; color: var(--text-muted);"></i>
+        <input type="text" id="searchInput" class="input-control" placeholder="搜尋傷患編號、受傷部位或備註..." style="padding-left: 38px;" oninput="filterPatients()">
+      </div>
+    </div>
+
+    <!-- Patients List View -->
+    <main style="padding-bottom: 80px;">
+      <!-- Page Waiting List -->
+      <div id="pageWaiting" class="tab-content-page">
+        <div id="waitingListContainer" style="display:flex; flex-direction:column; gap:10px;">
+          <!-- Items populated by JS -->
+        </div>
+      </div>
+
+      <!-- Page Assessed List -->
+      <div id="pageAssessed" class="tab-content-page" style="display: none;">
+        <div id="assessedListContainer" style="display:flex; flex-direction:column; gap:10px;">
+          <!-- Items populated by JS -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Detailed Assessment Form Modal -->
+    <div id="assessmentModal" class="modal-backdrop">
+      <div class="modal-content" style="max-width: 520px; width: 94%; padding: 20px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <i data-lucide="heart-pulse" style="color: #10b981; width: 22px; height: 22px;"></i>
+            <span id="assessmentModalTitle" style="font-weight:700; font-size:18px; color: var(--text-main);">治療區</span>
+          </div>
+          <button type="button" onclick="closeAssessmentModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+            <i data-lucide="x" style="width:20px; height:20px;"></i>
+          </button>
+        </div>
+
+        <form id="assessmentForm" onsubmit="saveAssessment(event)">
+          <input type="hidden" id="assessPatientId">
+
+          <!-- Section 1: Basic Info -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 16px 0 10px;">
+            一、 傷患基本資料
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessName">姓名</label>
+              <input type="text" id="assessName" class="input-control" placeholder="姓名 (可空)" style="height:38px;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>生理性別</label>
+              <div class="toggle-btn-group" style="display:flex; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; height:38px;">
+                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderMale" onclick="selectAssessGender('male')" style="flex:1; padding:0; font-size:12px; border:none; border-radius:0;">男</button>
+                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderFemale" onclick="selectAssessGender('female')" style="flex:1; padding:0; font-size:12px; border:none; border-radius:0;">女</button>
+                <button type="button" class="btn btn-secondary assess-gender-btn" id="assessGenderUnknown" onclick="selectAssessGender('unknown')" style="flex:1; padding:0; font-size:12px; border:none; border-radius:0;">不詳</button>
+              </div>
+              <input type="hidden" id="assessGender">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.5fr 0.7fr; gap:12px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>出生年月日</label>
+              <div style="display:flex; gap:4px;">
+                <select id="assessDobYear" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:2.2; font-size:11px; height:38px; padding:2px; border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobMonth" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; border:1px solid var(--border-color); border-radius: 4px;"></select>
+                <select id="assessDobDay" class="input-control" onchange="calculateAgeFromDobDropdowns()" style="flex:1; font-size:11px; height:38px; padding:2px; border:1px solid var(--border-color); border-radius: 4px;"></select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessAge">年齡 (歲)</label>
+              <input type="number" id="assessAge" class="input-control" placeholder="年齡" min="0" max="150" style="height:38px;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessNationalId">身分證字號</label>
+              <input type="text" id="assessNationalId" class="input-control" placeholder="身分證字號" style="text-transform:uppercase; height:38px;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessPhone">聯絡電話</label>
+              <input type="tel" id="assessPhone" class="input-control" placeholder="聯絡電話" style="height:38px;">
+            </div>
+          </div>
+
+          <!-- Section 2: Injured Parts -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
+            二、 受傷部位 (點擊人形圖標記並可註記傷情)
+          </div>
+          
+          <div style="display:flex; justify-content:space-around; align-items:center; background: rgba(0,0,0,0.15); border:1px solid var(--border-color); border-radius: var(--radius-sm); padding:10px 4px; margin-bottom:12px;">
+            
+            <!-- Front View (正面) -->
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted);">正面 (Front)</span>
+              <svg width="100" height="210" viewBox="0 0 100 210" style="overflow:visible;">
+                <style>
+                  .mq-part { fill: var(--mannequin-fill); stroke: var(--mannequin-stroke); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+                  .mq-part:hover { fill: rgba(16, 185, 129, 0.25); stroke: #10b981; }
+                  .mq-part.active { fill: rgba(239, 68, 68, 0.45); stroke: #ef4444; filter: drop-shadow(0 0 3px rgba(239,68,68,0.5)); }
+                </style>
+                <!-- Head -->
+                <circle id="mq-Head" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部(前)')" title="頭部(前)"></circle>
+                <!-- Neck -->
+                <rect id="mq-Neck" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部(前)')" title="頸部(前)"></rect>
+                <!-- Chest -->
+                <rect id="mq-Chest" class="mq-part" x="33" y="48" width="34" height="26" rx="4" onclick="toggleInjuredPart('胸部')" title="胸部"></rect>
+                <!-- Abdomen -->
+                <rect id="mq-Abdomen" class="mq-part" x="35" y="76" width="30" height="20" rx="2" onclick="toggleInjuredPart('腹部')" title="腹部"></rect>
+                <!-- Pelvis -->
+                <polygon id="mq-Pelvis" class="mq-part" points="35,98 65,98 61,114 39,114" onclick="toggleInjuredPart('骨盆(前)')" title="骨盆(前)"></polygon>
+                
+                <!-- Right Upper Limb parts (drawn on viewer's Left, x=14) -->
+                <rect id="mq-Rarm-upper" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂(前)')" title="右上臂(前)"></rect>
+                <rect id="mq-Rarm-fore" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂(前)')" title="右前臂(前)"></rect>
+                <circle id="mq-Rhand" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('右手(前)')" title="右手(前)"></circle>
+                
+                <!-- Left Upper Limb parts (drawn on viewer's Right, x=70) -->
+                <rect id="mq-Larm-upper" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂(前)')" title="左上臂(前)"></rect>
+                <rect id="mq-Larm-fore" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂(前)')" title="左前臂(前)"></rect>
+                <circle id="mq-Lhand" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('左手(前)')" title="左手(前)"></circle>
+                
+                <!-- Right Lower Limb parts (drawn on viewer's Left, x=34) -->
+                <rect id="mq-Rleg-thigh" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿(前)')" title="右大腿(前)"></rect>
+                <rect id="mq-Rleg-shin" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿(前)')" title="右小腿(前)"></rect>
+                
+                <!-- Left Lower Limb parts (drawn on viewer's Right, x=52) -->
+                <rect id="mq-Lleg-thigh" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿(前)')" title="左大腿(前)"></rect>
+                <rect id="mq-Lleg-shin" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿(前)')" title="左小腿(前)"></rect>
+              </svg>
+            </div>
+
+            <!-- Back View (背面) -->
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted);">背面 (Back)</span>
+              <svg width="100" height="210" viewBox="0 0 100 210" style="overflow:visible;">
+                <!-- Head (Back) -->
+                <circle id="mq-Head-back" class="mq-part" cx="50" cy="22" r="14" onclick="toggleInjuredPart('頭部(後)')" title="頭部(後)"></circle>
+                <!-- Neck (Back) -->
+                <rect id="mq-Neck-back" class="mq-part" x="46" y="36" width="8" height="10" rx="1" onclick="toggleInjuredPart('頸部(後)')" title="頸部(後)"></rect>
+                <!-- Back/Spine (背部脊椎) -->
+                <rect id="mq-Back" class="mq-part" x="33" y="48" width="34" height="50" rx="4" onclick="toggleInjuredPart('背部脊椎')" title="背部脊椎"></rect>
+                <!-- Pelvis/Glute (Back) -->
+                <polygon id="mq-Pelvis-back" class="mq-part" points="35,100 65,100 61,114 39,114" onclick="toggleInjuredPart('骨盆(後)')" title="骨盆(後)"></polygon>
+                
+                <!-- Left Upper Limb parts (Back) -->
+                <rect id="mq-Larm-upper-back" class="mq-part" x="14" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('左上臂(後)')" title="左上臂(後)"></rect>
+                <rect id="mq-Larm-fore-back" class="mq-part" x="14" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('左前臂(後)')" title="左前臂(後)"></rect>
+                <circle id="mq-Lhand-back" class="mq-part" cx="22" cy="98" r="7" onclick="toggleInjuredPart('左手(後)')" title="左手(後)"></circle>
+                
+                <!-- Right Upper Limb parts (Back) -->
+                <rect id="mq-Rarm-upper-back" class="mq-part" x="70" y="48" width="16" height="23" rx="4" onclick="toggleInjuredPart('右上臂(後)')" title="右上臂(後)"></rect>
+                <rect id="mq-Rarm-fore-back" class="mq-part" x="70" y="73" width="16" height="19" rx="3" onclick="toggleInjuredPart('右前臂(後)')" title="右前臂(後)"></rect>
+                <circle id="mq-Rhand-back" class="mq-part" cx="78" cy="98" r="7" onclick="toggleInjuredPart('右手(後)')" title="右手(後)"></circle>
+                
+                <!-- Left Lower Limb parts (Back) -->
+                <rect id="mq-Lleg-thigh-back" class="mq-part" x="34" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('左大腿(後)')" title="左大腿(後)"></rect>
+                <rect id="mq-Lleg-shin-back" class="mq-part" x="34" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('左小腿(後)')" title="左小腿(後)"></rect>
+                
+                <!-- Right Lower Limb parts (Back) -->
+                <rect id="mq-Rleg-thigh-back" class="mq-part" x="52" y="117" width="14" height="36" rx="4" onclick="toggleInjuredPart('右大腿(後)')" title="右大腿(後)"></rect>
+                <rect id="mq-Rleg-shin-back" class="mq-part" x="52" y="155" width="14" height="40" rx="4" onclick="toggleInjuredPart('右小腿(後)')" title="右小腿(後)"></rect>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Quick Select and Clear Actions -->
+          <div style="display:flex; justify-content:space-between; margin-bottom:12px; gap:8px;">
+            <button type="button" class="btn btn-secondary" onclick="toggleInjuredPart('無明顯外傷')" id="partNoneBtn" style="flex:1; padding:6px 0; font-size:12px; height:32px;">無明顯外傷</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleInjuredPart('燒燙傷')" id="partBurnsBtn" style="flex:1; padding:6px 0; font-size:12px; height:32px;">全身燒燙傷</button>
+            <button type="button" class="btn btn-secondary" onclick="clearInjuredParts()" style="flex:1; padding:6px 0; font-size:12px; height:32px; color:var(--text-muted);">重設部位</button>
+          </div>
+
+          <!-- Injured Parts Notes Annotations Container -->
+          <div id="injuredPartsNotesContainer" style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; min-height: 48px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; color:var(--text-muted); text-align:center; padding:6px 0;">點擊上方人體部位以開啟傷勢備註</div>
+          </div>
+
+
+          <!-- Section 3: Vital Signs -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
+            三、 生命徵象 (Vital Signs)
+          </div>
+
+          <!-- GCS Sliders (Full Width) -->
+          <div class="form-group" style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+            <div style="font-size:13px; color:var(--text-muted); font-weight:600; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+              <span>意識狀態 (GCS 評估)</span>
+              <span style="font-size:13.5px; font-weight:800; color:#10b981;" id="gcsTotalDisplay">GCS 15 (E4 V5 M6)</span>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:55px;">E (眼睜)</span>
+                <input type="range" id="gcsE" min="1" max="4" value="4" oninput="updateGcsScore()" style="flex:1; accent-color:#10b981; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none;">
+                <span id="gcsEDisplay" style="font-weight:800; font-size:13.5px; width:20px; text-align:right;">4</span>
+                <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-left:8px; user-select:none;">
+                  <input type="checkbox" id="gcsENT" onchange="updateGcsScore()" style="accent-color:#10b981; width:14px; height:14px; cursor:pointer;"> NT
+                </label>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:55px;">V (言語)</span>
+                <input type="range" id="gcsV" min="1" max="5" value="5" oninput="updateGcsScore()" style="flex:1; accent-color:#10b981; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none;">
+                <span id="gcsVDisplay" style="font-weight:800; font-size:13.5px; width:20px; text-align:right;">5</span>
+                <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-left:8px; user-select:none;">
+                  <input type="checkbox" id="gcsVNT" onchange="updateGcsScore()" style="accent-color:#10b981; width:14px; height:14px; cursor:pointer;"> NT
+                </label>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-family:var(--font-title); font-weight:800; font-size:13.5px; color:var(--text-main); width:55px;">M (運動)</span>
+                <input type="range" id="gcsM" min="1" max="6" value="6" oninput="updateGcsScore()" style="flex:1; accent-color:#10b981; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none;">
+                <span id="gcsMDisplay" style="font-weight:800; font-size:13.5px; width:20px; text-align:right;">6</span>
+                <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-left:8px; user-select:none;">
+                  <input type="checkbox" id="gcsMNT" onchange="updateGcsScore()" style="accent-color:#10b981; width:14px; height:14px; cursor:pointer;"> NT
+                </label>
+              </div>
+            </div>
+            <input type="hidden" id="assessGcs" value="15 (E4V5M6)">
+          </div>
+
+          <!-- SpO2 & Temp -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessSpo2">血氧 SpO2 (%)</label>
+              <input type="number" id="assessSpo2" class="input-control vitals-input" placeholder="" min="10" max="100" oninput="validateVital('spo2')">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessTemp">體溫 (°C)</label>
+              <input type="number" step="0.1" id="assessTemp" class="input-control vitals-input" placeholder="" min="25" max="45" oninput="validateVital('temp')">
+            </div>
+          </div>
+
+          <!-- Blood Pressure -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessBpSys">收縮壓 (mmHg)</label>
+              <input type="number" id="assessBpSys" class="input-control vitals-input" placeholder="" min="20" max="300" oninput="validateVital('bpsys')">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessBpDia">舒張壓 (mmHg)</label>
+              <input type="number" id="assessBpDia" class="input-control" placeholder="" min="10" max="200">
+            </div>
+          </div>
+
+          <!-- HR & RR -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessHr">心跳/脈搏 (bpm)</label>
+              <input type="number" id="assessHr" class="input-control vitals-input" placeholder="" min="10" max="250" oninput="validateVital('hr')">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="assessRr">呼吸頻率 (bpm)</label>
+              <input type="number" id="assessRr" class="input-control vitals-input" placeholder="" min="0" max="80" oninput="validateVital('rr')">
+            </div>
+          </div>
+
+          <!-- Section 4: Secondary Triage Override -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px; display:flex; justify-content:space-between; align-items:center;">
+            <span>四、 二次檢傷等級判定</span>
+            <span id="triageSuggestionBox" style="font-size:12px; font-weight:normal; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px;">
+              生理預判：<span id="suggestedTriageLabel" style="font-weight:700;">-</span> 
+              <button type="button" onclick="applySuggestedTriage()" id="applyTriageSuggestionBtn" style="display:none; background:rgba(59,130,246,0.1); border:1px solid var(--primary); color:var(--primary); padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer;">套用</button>
+            </span>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:16px;">
+            <button type="button" class="triage-color-btn red assess-triage-btn" onclick="setAssessTriage('red')" style="padding:10px 4px; font-size:12px; height:auto; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:none;">
+              <i data-lucide="flame" style="width:16px; height:16px;"></i>
+              <span>立即</span>
+            </button>
+            <button type="button" class="triage-color-btn yellow assess-triage-btn" onclick="setAssessTriage('yellow')" style="padding:10px 4px; font-size:12px; height:auto; display:flex; flex-direction:column; align-items:center; gap:4px; color:black; box-shadow:none;">
+              <i data-lucide="alert-triangle" style="width:16px; height:16px;"></i>
+              <span>延遲</span>
+            </button>
+            <button type="button" class="triage-color-btn green assess-triage-btn" onclick="setAssessTriage('green')" style="padding:10px 4px; font-size:12px; height:auto; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:none;">
+              <i data-lucide="user-check" style="width:16px; height:16px;"></i>
+              <span>輕傷</span>
+            </button>
+            <button type="button" class="triage-color-btn black assess-triage-btn" onclick="setAssessTriage('black')" style="padding:10px 4px; font-size:12px; height:auto; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:none;">
+              <i data-lucide="skull" style="width:16px; height:16px;"></i>
+              <span>死亡</span>
+            </button>
+          </div>
+          <input type="hidden" id="assessTriageLevel">
+
+          <!-- Section 5: Medications Record -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
+            五、 治療用藥紀錄 (Medications)
+          </div>
+          
+          <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+            <!-- Input Row -->
+            <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:8px; margin-bottom:8px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">給藥時間</label>
+                <input type="time" id="medTime" class="input-control" style="font-size:12px; height:32px; color-scheme: dark; padding: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">藥物名稱</label>
+                <select id="medName" class="input-control" style="font-size:12px; height:32px; border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                  <option value="Amiodarone">Amiodarone</option>
+                  <option value="D10W">D10W</option>
+                  <option value="D50W">D50W</option>
+                  <option value="Epinephrine">Epinephrine</option>
+                  <option value="N/S">N/S</option>
+                  <option value="NTG">NTG</option>
+                  <option value="Tramadol">Tramadol</option>
+                  <option value="Transamin">Transamin</option>
+                </select>
+              </div>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:8px; margin-bottom:8px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">給藥途徑</label>
+                <select id="medRoute" class="input-control" style="font-size:12px; height:32px; border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                  <option value="IV">IV</option>
+                  <option value="IO">IO</option>
+                  <option value="口服">口服</option>
+                  <option value="舌下">舌下</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">藥物劑量</label>
+                <div style="display:flex; gap:4px;">
+                  <input type="number" id="medDoseVal" class="input-control" placeholder="劑量" style="flex:1; font-size:12px; height:32px; padding: 4px;">
+                  <select id="medDoseUnit" class="input-control" style="width:65px; font-size:12px; height:32px; border:1px solid var(--border-color); padding: 4px; border-radius:4px;">
+                    <option value="mg">mg</option>
+                    <option value="ml">ml</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:8px; align-items:flex-end;">
+              <div class="form-group" style="margin-bottom:0; flex:1;">
+                <label style="font-size:11px; margin-bottom:4px; display:block;">用藥備註</label>
+                <input type="text" id="medRemark" class="input-control" placeholder="用藥註記..." style="font-size:12px; height:32px; padding: 4px;">
+              </div>
+              <button type="button" onclick="addMedicationRecord()" class="btn btn-primary" style="padding:0 12px; height:32px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:4px; background:var(--primary-gradient); border:none; color:white; border-radius: 4px; cursor:pointer;">
+                <i data-lucide="plus" style="width:14px; height:14px;"></i> 新增
+              </button>
+            </div>
+            
+            <!-- Medications Table List -->
+            <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px; max-height: 120px; overflow-y: auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted);">
+                    <th style="padding:4px 2px;">時間</th>
+                    <th style="padding:4px 2px;">藥物名稱</th>
+                    <th style="padding:4px 2px;">途徑</th>
+                    <th style="padding:4px 2px;">劑量</th>
+                    <th style="padding:4px 2px;">備註</th>
+                    <th style="padding:4px 2px; text-align:center; width:30px;">刪除</th>
+                  </tr>
+                </thead>
+                <tbody id="medicationListBody">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 6: Vitals History (歷史生命徵象比對) -->
+          <div class="section-title" style="font-size:14px; font-weight:700; color:#10b981; border-left:3px solid #10b981; padding-left:8px; margin: 20px 0 10px;">
+            六、 歷史生命徵象比對 (Vitals History)
+          </div>
+          <div id="vitalsHistoryContainer" style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px; overflow-x: auto;">
+            <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 10px 0;">暫無多次檢傷歷史紀錄</div>
+          </div>
+
+          <!-- Section 7: Clinical Notes -->
+          <div class="form-group" style="margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label for="assessNotes" style="margin-bottom:0;">七、 臨床備註與處置說明</label>
+              <button type="button" onclick="insertNoteTimestamp()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-family:var(--font-body);">
+                <i data-lucide="clock" style="width:12px; height:12px;"></i> 插入時間戳記
+              </button>
+            </div>
+            <textarea id="assessNotes" class="input-control" placeholder="請描述主要傷勢、已進行的緊急醫療處置 (如：給氧、包紮止血、靜脈注射) 或用藥紀錄..." style="height: 80px; resize: none; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); width:100%; outline:none; font-family:var(--font-body);"></textarea>
+          </div>
+
+          <!-- Actions -->
+          <div class="modal-actions" style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; display:flex; gap:10px;">
+            <button type="button" class="btn btn-secondary" onclick="closeAssessmentModal()" style="flex:1; padding:12px 0;">取消</button>
+            <button type="submit" class="btn btn-primary" style="flex:2; padding:12px 0; background:var(--primary-gradient); color:white; border:none; font-weight:700;">儲存並即時同步</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="treatment.js"></script>
+</body>
+</html>
