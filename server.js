@@ -3,6 +3,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -52,6 +53,45 @@ let systemState = {
     { id: 'v5', name: '朴子91', status: 'standby', hospitalName: null, patientId: null, timestamp: null }
   ]
 };
+
+// Backup File Path
+const BACKUP_FILE = path.join(__dirname, 'state_backup.json');
+
+// Save State to Backup File
+function saveState() {
+  try {
+    fs.writeFile(BACKUP_FILE, JSON.stringify(systemState, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('[Backup] Error writing backup file:', err);
+      }
+    });
+  } catch (err) {
+    console.error('[Backup] Unexpected error in saveState:', err);
+  }
+}
+
+// Load State from Backup File
+function loadState() {
+  try {
+    if (fs.existsSync(BACKUP_FILE)) {
+      const rawData = fs.readFileSync(BACKUP_FILE, 'utf8');
+      if (rawData.trim()) {
+        const loadedState = JSON.parse(rawData);
+        if (loadedState && loadedState.patients && loadedState.hospitals && loadedState.vehicles) {
+          systemState = loadedState;
+          console.log(`[Backup] State successfully restored from state_backup.json. Patients: ${systemState.patients.length}`);
+          return;
+        }
+      }
+    }
+    console.log('[Backup] No valid backup found. Starting with default initial state.');
+  } catch (err) {
+    console.error('[Backup] Error loading backup file:', err);
+  }
+}
+
+// Restore state from backup at startup
+loadState();
 
 // Log state reset helper
 function resetState() {
@@ -120,6 +160,9 @@ function broadcast(type, data) {
       client.send(payload);
     }
   }
+  if (type === 'STATE_UPDATE') {
+    saveState();
+  }
 }
 
 function handleAction(action, sender) {
@@ -182,30 +225,33 @@ function handleAction(action, sender) {
       break;
 
     case 'TRANSPORT_PATIENT':
-      const { patientId, vehicleId, hospitalId } = data;
-      const patient = systemState.patients.find(p => p.id === patientId);
+      const { patientId, patientIds, vehicleId, hospitalId } = data;
+      const targetPatientIds = patientIds || (patientId ? [patientId] : []);
       const vehicle = systemState.vehicles.find(v => v.id === vehicleId);
       const hospital = systemState.hospitals.find(h => h.id === hospitalId);
 
-      if (patient && vehicle && hospital) {
+      if (targetPatientIds.length > 0 && vehicle && hospital) {
         const timeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false });
         
-        // Update patient
-        patient.status = 'transported';
-        patient.transportInfo = {
-          vehicleName: vehicle.name,
-          hospitalName: hospital.name,
-          time: timeStr
-        };
+        targetPatientIds.forEach(pId => {
+          const patient = systemState.patients.find(p => p.id === pId);
+          if (patient) {
+            patient.status = 'transported';
+            patient.transportInfo = {
+              vehicleName: vehicle.name,
+              hospitalName: hospital.name,
+              time: timeStr
+            };
+            hospital.receivedCount += 1;
+          }
+        });
 
         // Update vehicle
         vehicle.status = 'transporting';
         vehicle.hospitalName = hospital.name;
-        vehicle.patientId = patientId;
+        vehicle.patientId = targetPatientIds.join(', ');
+        vehicle.patientIds = targetPatientIds;
         vehicle.timestamp = new Date().toISOString();
-
-        // Update hospital
-        hospital.receivedCount += 1;
 
         broadcast('STATE_UPDATE', systemState);
       }
@@ -218,6 +264,7 @@ function handleAction(action, sender) {
         veh.status = 'standby';
         veh.hospitalName = null;
         veh.patientId = null;
+        veh.patientIds = null;
         veh.timestamp = null;
         veh.transportCount = (veh.transportCount || 0) + 1;
         broadcast('STATE_UPDATE', systemState);
