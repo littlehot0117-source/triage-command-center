@@ -46,9 +46,12 @@
       <h1 id="headerCaseName">大傷監測指揮儀表板</h1>
       <span class="badge-live">LIVE 監測中</span>
     </div>
-    <div style="display: flex; gap: 12px; align-items: center;">
+    <div style="display: flex; gap: 8px; align-items: center;">
       <button onclick="openLocationMap()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px;">
         <i data-lucide="map" style="width: 16px; height: 16px;"></i> 病患定位地圖
+      </button>
+      <button onclick="togglePresbyopiaMode()" id="presbyopiaBtn" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; border-color: #8b5cf6; color: #8b5cf6; background: rgba(139, 92, 246, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px; cursor: pointer; border-radius: var(--radius-sm); outline: none; transition: all 0.2s;">
+        <i data-lucide="zoom-in" style="width: 16px; height: 16px;"></i> 大字體
       </button>
       <a href="treatment.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px;">
         <i data-lucide="activity" style="width: 16px; height: 16px;"></i> 進入治療區系統

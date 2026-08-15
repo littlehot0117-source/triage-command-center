@@ -53,6 +53,11 @@
   <!-- 1. Login Selection Pane (overlay if no officer code selected) -->
   <div id="loginSection" class="officer-container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: calc(20px + env(safe-area-inset-top, 0px)) 10px 20px 10px;">
     <div class="glass-card login-card" style="margin: 0; width: 100%; max-width: 500px;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+        <button onclick="togglePresbyopiaMode()" id="presbyopiaBtnLogin" class="btn btn-secondary" style="height: 28px; padding: 0 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border-color: #8b5cf6; color: #8b5cf6; background: rgba(139, 92, 246, 0.05); font-weight: 700; cursor: pointer; border-radius: 4px; outline: none; transition: all 0.2s;">
+          <i data-lucide="zoom-in" style="width: 12px; height: 12px;"></i> 大字體
+        </button>
+      </div>
       <i data-lucide="shield-alert" style="color: var(--triage-yellow); width: 44px; height: 44px; margin: 0 auto 12px;"></i>
       <h2 style="font-size: 22px; margin-bottom: 8px;">選擇您的檢傷官姓名</h2>
       <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">請點選您的姓名進行登入。<br>您的判定代碼將使用對應代號開頭（例如：A01）。</p>
@@ -100,6 +105,9 @@
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
+          <button onclick="togglePresbyopiaMode()" id="presbyopiaBtn" class="btn btn-secondary" style="height: 28px; padding: 0 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border-color: #8b5cf6; color: #8b5cf6; background: rgba(139, 92, 246, 0.05); font-weight: 700; cursor: pointer; border-radius: 4px; outline: none; transition: all 0.2s;">
+            <i data-lucide="zoom-in" style="width: 12px; height: 12px;"></i> 大字體
+          </button>
           <button onclick="openLocationMap()" class="btn btn-secondary" style="height: 28px; padding: 0 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05); font-weight: 700; cursor: pointer; border-radius: 4px; outline: none; transition: all 0.2s;">
             <i data-lucide="map" style="width: 12px; height: 12px;"></i> 定位地圖
           </button>

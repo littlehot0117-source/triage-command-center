@@ -1276,3 +1276,38 @@ function createAndShowMapModal() {
     map.fitBounds(bounds, { padding: [30, 30] });
   }
 }
+
+// Presbyopia Mode toggler
+function togglePresbyopiaMode() {
+  const isEnabled = document.body.classList.toggle('presbyopia-mode');
+  localStorage.setItem('presbyopia_mode', isEnabled ? 'true' : 'false');
+  updatePresbyopiaButtonUI();
+}
+
+function updatePresbyopiaButtonUI() {
+  const isEnabled = document.body.classList.contains('presbyopia-mode');
+  const btns = [document.getElementById('presbyopiaBtn'), document.getElementById('presbyopiaBtnLogin')];
+  btns.forEach(btn => {
+    if (!btn) return;
+    if (isEnabled) {
+      btn.style.background = '#8b5cf6';
+      btn.style.color = 'white';
+      btn.innerHTML = `<i data-lucide="zoom-out" style="width:14px;height:14px;vertical-align:middle;"></i> 還原字體`;
+    } else {
+      btn.style.background = 'rgba(139, 92, 246, 0.05)';
+      btn.style.color = '#8b5cf6';
+      btn.innerHTML = `<i data-lucide="zoom-in" style="width:14px;height:14px;vertical-align:middle;"></i> 大字體`;
+    }
+  });
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Auto load presbyopia setting on startup
+(function() {
+  if (localStorage.getItem('presbyopia_mode') === 'true') {
+    document.body.classList.add('presbyopia-mode');
+    document.addEventListener('DOMContentLoaded', () => {
+      updatePresbyopiaButtonUI();
+    });
+  }
+})();
