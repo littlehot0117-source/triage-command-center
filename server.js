@@ -45,13 +45,7 @@ let systemState = {
     { id: 'h7', name: '陽明醫院', capacity: 5, receivedCount: 0 },
     { id: 'h8', name: '中榮灣橋分院', capacity: 5, receivedCount: 0 }
   ],
-  vehicles: [
-    { id: 'v1', name: '雙福91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-    { id: 'v2', name: '祥和91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-    { id: 'v3', name: '太保91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-    { id: 'v4', name: '民雄91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-    { id: 'v5', name: '朴子91', status: 'standby', hospitalName: null, patientId: null, timestamp: null }
-  ]
+  vehicles: []
 };
 
 // Backup File Path
@@ -98,13 +92,7 @@ function resetState() {
   systemState.currentCase = { name: '', status: 'idle', startTime: null };
   systemState.patients = [];
   systemState.hospitals.forEach(h => h.receivedCount = 0);
-  systemState.vehicles.forEach(v => {
-    v.status = 'standby';
-    v.hospitalName = null;
-    v.patientId = null;
-    v.timestamp = null;
-    v.transportCount = 0;
-  });
+  systemState.vehicles = [];
 }
 
 // Serve static files from the 'public' directory
@@ -177,13 +165,7 @@ function handleAction(action, sender) {
       };
       systemState.patients = [];
       systemState.hospitals.forEach(h => h.receivedCount = 0);
-      systemState.vehicles.forEach(v => {
-        v.status = 'standby';
-        v.hospitalName = null;
-        v.patientId = null;
-        v.timestamp = null;
-        v.transportCount = 0;
-      });
+      systemState.vehicles = [];
       broadcast('STATE_UPDATE', systemState);
       break;
 
