@@ -481,11 +481,7 @@ function openAssessmentModal(patientId) {
   } else {
     // Default initializations for new assessment
     selectAssessGender(p.gender || 'unknown');
-    if (p.ageGroup === 'child') {
-      document.getElementById('assessAge').value = '10';
-    } else if (p.ageGroup === 'adult') {
-      document.getElementById('assessAge').value = '30';
-    }
+    document.getElementById('assessAge').value = '';
     
     patientMedications = [];
     renderMedicationsTable();
@@ -499,6 +495,11 @@ function openAssessmentModal(patientId) {
   
   // Render historical vitals comparison table
   renderVitalsHistory(p);
+  
+  // Initialize medication inputs to default state
+  document.getElementById('medName').value = 'Amiodarone';
+  document.getElementById('medRemark').value = '';
+  handleMedicationSelectionChange();
   
   document.getElementById('assessmentModal').classList.add('show');
   lucide.createIcons();
@@ -646,6 +647,49 @@ function calculateAgeFromDobDropdowns() {
 // Medication administration record methods
 let patientMedications = [];
 
+function handleMedicationSelectionChange() {
+  const medName = document.getElementById('medName').value;
+  
+  if (medName === 'Amiodarone') {
+    // Count how many Amiodarone records are already in patientMedications
+    const count = patientMedications.filter(med => med.name === 'Amiodarone').length;
+    
+    // Set route to IV
+    document.getElementById('medRoute').value = 'IV';
+    // Set unit to mg
+    document.getElementById('medDoseUnit').value = 'mg';
+    
+    if (count === 0) {
+      document.getElementById('medDoseVal').value = '300';
+    } else {
+      document.getElementById('medDoseVal').value = '150';
+    }
+  } else if (medName === 'D10W') {
+    document.getElementById('medRoute').value = 'IV';
+    document.getElementById('medDoseUnit').value = 'ml';
+    document.getElementById('medDoseVal').value = '500';
+  } else if (medName === 'D50W') {
+    document.getElementById('medRoute').value = 'IV';
+    document.getElementById('medDoseUnit').value = 'ml';
+    document.getElementById('medDoseVal').value = '40';
+  } else if (medName === 'Epinephrine') {
+    document.getElementById('medRoute').value = 'IV';
+    document.getElementById('medDoseUnit').value = 'mg';
+    document.getElementById('medDoseVal').value = '1';
+  } else if (medName === 'N/S') {
+    document.getElementById('medRoute').value = 'IV';
+    document.getElementById('medDoseUnit').value = 'ml';
+    document.getElementById('medDoseVal').value = '500';
+  } else if (medName === 'NTG') {
+    document.getElementById('medRoute').value = '口服';
+    document.getElementById('medDoseUnit').value = '顆';
+    document.getElementById('medDoseVal').value = '1';
+  } else {
+    // Clear dosage value for other medications to prevent overdose errors
+    document.getElementById('medDoseVal').value = '';
+  }
+}
+
 function addMedicationRecord() {
   const time = document.getElementById('medTime').value;
   const name = document.getElementById('medName').value;
@@ -673,15 +717,21 @@ function addMedicationRecord() {
   
   patientMedications.push(record);
   
-  // Clear input
-  document.getElementById('medDoseVal').value = '';
+  // Clear remark
   document.getElementById('medRemark').value = '';
+  
+  // Update medication default inputs for next dose
+  handleMedicationSelectionChange();
   
   renderMedicationsTable();
 }
 
 function removeMedicationRecord(index) {
   patientMedications.splice(index, 1);
+  
+  // Re-evaluate defaults in case they deleted an Amiodarone dose
+  handleMedicationSelectionChange();
+  
   renderMedicationsTable();
 }
 
@@ -1282,6 +1332,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initConnection();
   lucide.createIcons();
   startCountdownTimer();
+  
+  const medNameEl = document.getElementById('medName');
+  if (medNameEl) {
+    medNameEl.addEventListener('change', handleMedicationSelectionChange);
+  }
 });
 
 // 🗺️ 病患即時定位系統 (Leaflet Map Modal)

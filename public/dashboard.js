@@ -108,13 +108,7 @@ function resetLocalState() {
       { id: 'h7', name: '陽明醫院', capacity: 5, receivedCount: 0 },
       { id: 'h8', name: '中榮灣橋分院', capacity: 5, receivedCount: 0 }
     ],
-    vehicles: [
-      { id: 'v1', name: '雙福91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-      { id: 'v2', name: '祥和91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-      { id: 'v3', name: '太保91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-      { id: 'v4', name: '民雄91', status: 'standby', hospitalName: null, patientId: null, timestamp: null },
-      { id: 'v5', name: '朴子91', status: 'standby', hospitalName: null, patientId: null, timestamp: null }
-    ]
+    vehicles: []
   };
   saveLocalState();
 }
@@ -143,13 +137,7 @@ function handleLocalAction(type, data) {
       };
       state.patients = [];
       state.hospitals.forEach(h => h.receivedCount = 0);
-      state.vehicles.forEach(v => {
-        v.status = 'standby';
-        v.hospitalName = null;
-        v.patientId = null;
-        v.timestamp = null;
-        v.transportCount = 0;
-      });
+      state.vehicles = [];
       break;
 
     case 'END_CASE':
