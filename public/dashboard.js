@@ -1393,3 +1393,96 @@ function updatePresbyopiaButtonUI() {
     });
   }
 })();
+
+// Export all patient data to Excel
+function exportToExcel() {
+  if (!state || !state.patients || state.patients.length === 0) {
+    alert('目前尚無傷患資料可以匯出！');
+    return;
+  }
+  
+  const getTriageLabelZh = (level) => {
+    switch (level) {
+      case 'red': return '🔴 立即治療 (Immediate)';
+      case 'yellow': return '🟡 延遲治療 (Delayed)';
+      case 'green': return '🟢 輕傷 (Minor)';
+      case 'black': return '⚫ 期待治療/死亡 (Expectant)';
+      default: return '未知';
+    }
+  };
+  
+  const data = state.patients.map(p => {
+    const t = p.treatmentInfo || {};
+    const v = t.vitals || {};
+    const trans = p.transportInfo || {};
+    
+    // Formatting injured parts list
+    const partsStr = t.injuredParts ? Array.from(t.injuredParts).join(', ') : '';
+    
+    // Formatting parts notes
+    let notesArr = [];
+    if (t.injuredPartsNotes) {
+      for (const [part, note] of Object.entries(t.injuredPartsNotes)) {
+        if (note) notesArr.push(`${part}: ${note}`);
+      }
+    }
+    const partsNotesStr = notesArr.join('; ');
+    
+    // Formatting medications list
+    const medsStr = t.medications ? t.medications.map(m => `[${m.time}] ${m.name} (${m.dose}, ${m.route})${m.remark && m.remark !== '-' ? ` 備註: ${m.remark}` : ''}`).join('; ') : '';
+    
+    return {
+      '傷患編號': p.id,
+      '現場檢傷等級': getTriageLabelZh(p.triageLevel),
+      '二次檢傷等級': t.updatedTriageLevel ? getTriageLabelZh(t.updatedTriageLevel) : '-',
+      '性別': p.gender === 'male' ? '男' : (p.gender === 'female' ? '女' : '未知'),
+      '年齡層': p.ageGroup === 'child' ? '兒童' : '成人',
+      '現場狀況簡述': p.description || '',
+      '姓名': t.name || '',
+      '身分證字號': t.nationalId || '',
+      '年齡 (歲)': t.age || '',
+      '聯絡電話': t.phone || '',
+      '受傷部位': partsStr,
+      '傷勢處置說明': partsNotesStr,
+      '血氧(SpO2)': v.spo2 ? `${v.spo2}%` : '',
+      '體溫': v.temp ? `${v.temp}℃` : '',
+      '心跳': v.hr ? `${v.hr}次/分` : '',
+      '收縮壓': v.bpSystolic ? `${v.bpSystolic} mmHg` : '',
+      '舒張壓': v.bpDiastolic ? `${v.bpDiastolic} mmHg` : '',
+      '呼吸': v.rr ? `${v.rr}次/分` : '',
+      'GCS': v.gcs || '',
+      '用藥紀錄': medsStr,
+      '病歷備註': t.notes || '',
+      '目前動向': p.status === 'transported' ? '🚑 已送醫' : '現場待命',
+      '送往醫院': trans.hospitalName || '-',
+      '送醫載具': trans.vehicleName || '-',
+      '送醫時間': trans.timestamp ? new Date(trans.timestamp).toLocaleString('zh-TW', { hour12: false }) : '-'
+    };
+  });
+  
+  try {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '大傷患者清單');
+    
+    // Set column widths for better readability
+    const max_widths = [];
+    data.forEach(row => {
+      Object.keys(row).forEach((key, col_idx) => {
+        const val_str = row[key] ? String(row[key]) : '';
+        const len = val_str.length * 2 + 3; // rough estimate for multi-byte characters
+        if (!max_widths[col_idx] || len > max_widths[col_idx]) {
+          max_widths[col_idx] = len;
+        }
+      });
+    });
+    worksheet['!cols'] = max_widths.map(w => ({ w: Math.min(50, Math.max(12, w)) }));
+    
+    const caseName = state.currentCase.name || '未命名事件';
+    const filename = `大傷患者清單_${caseName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+  } catch (err) {
+    console.error('Failed to export Excel file:', err);
+    alert('匯出 EXCEL 檔失敗，請確認是否正常連線。');
+  }
+}

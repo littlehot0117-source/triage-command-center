@@ -1149,22 +1149,22 @@ tr:hover td {
 /* Presbyopia Mode (大字體/親老/老花友善模式) CSS Override rules */
 body.presbyopia-mode h1,
 body.presbyopia-mode h1 * {
-  font-size: clamp(20px, 5.5vw, 26px) !important;
+  font-size: clamp(22px, 5.8vw, 28px) !important;
 }
 body.presbyopia-mode h2,
 body.presbyopia-mode h2 * {
-  font-size: clamp(18px, 4.8vw, 22px) !important;
+  font-size: clamp(18px, 4.6vw, 24px) !important;
 }
 body.presbyopia-mode h3,
 body.presbyopia-mode h3 * {
-  font-size: clamp(16px, 4.2vw, 19px) !important;
+  font-size: clamp(15px, 4vw, 19px) !important;
 }
 
 body.presbyopia-mode .btn,
 body.presbyopia-mode button,
 body.presbyopia-mode .btn *,
 body.presbyopia-mode button * {
-  font-size: clamp(14px, 3.8vw, 16px) !important;
+  font-size: clamp(13.5px, 3.6vw, 15.5px) !important;
 }
 body.presbyopia-mode .btn,
 body.presbyopia-mode button {
@@ -1185,15 +1185,15 @@ body.presbyopia-mode textarea {
   padding-bottom: 8px !important;
 }
 
-body.presbyopia-mode div,
 body.presbyopia-mode p,
-body.presbyopia-mode span,
 body.presbyopia-mode label,
 body.presbyopia-mode a,
 body.presbyopia-mode li,
 body.presbyopia-mode td,
-body.presbyopia-mode th {
-  font-size: clamp(13.5px, 3.6vw, 16px) !important;
+body.presbyopia-mode th,
+body.presbyopia-mode select,
+body.presbyopia-mode option {
+  font-size: clamp(13.5px, 3.6vw, 16.5px) !important;
   line-height: 1.6 !important;
 }
 
@@ -1214,8 +1214,40 @@ body.presbyopia-mode .bottom-nav-btn i {
 /* Ensure body container stays readable */
 body.presbyopia-mode .officer-container,
 body.presbyopia-mode .app-content {
-  max-width: 650px !important;
-  padding: 20px 14px !important;
+  max-width: 680px !important;
+  padding: 16px 12px !important;
+}
+
+/* Specific scaling for dashboard & wizard elements */
+body.presbyopia-mode .stat-value {
+  font-size: clamp(38px, 9vw, 48px) !important;
+}
+body.presbyopia-mode .stat-card h3 {
+  font-size: clamp(13.5px, 3.6vw, 16px) !important;
+}
+body.presbyopia-mode .wizard-question {
+  font-size: 22px !important;
+  margin-bottom: 24px !important;
+}
+body.presbyopia-mode .wizard-btn {
+  font-size: 20px !important;
+  min-height: 50px !important;
+}
+body.presbyopia-mode .wizard-options {
+  gap: 20px !important;
+}
+
+/* Scale up patient details inside list cards */
+body.presbyopia-mode .patient-card .patient-id,
+body.presbyopia-mode .history-item div {
+  font-size: 15px !important;
+}
+body.presbyopia-mode #caseTimer,
+body.presbyopia-mode .live-timer {
+  font-size: 18px !important;
+}
+body.presbyopia-mode .hospital-card span {
+  font-size: 14.5px !important;
 }
 
 

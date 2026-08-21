@@ -53,6 +53,9 @@
       <button onclick="togglePresbyopiaMode()" id="presbyopiaBtn" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; border-color: #8b5cf6; color: #8b5cf6; background: rgba(139, 92, 246, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px; cursor: pointer; border-radius: var(--radius-sm); outline: none; transition: all 0.2s;">
         <i data-lucide="zoom-in" style="width: 16px; height: 16px;"></i> 大字體
       </button>
+      <button onclick="exportToExcel()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px; cursor: pointer; border-radius: var(--radius-sm); outline: none; transition: all 0.2s;">
+        <i data-lucide="download" style="width: 16px; height: 16px;"></i> 匯出 EXCEL
+      </button>
       <a href="treatment.html" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); font-weight: 700; height: 38px; padding: 0 14px; font-size: 13.5px;">
         <i data-lucide="activity" style="width: 16px; height: 16px;"></i> 進入治療區系統
       </a>
@@ -498,6 +501,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="dashboard.js"></script>
 </body>
 </html>
